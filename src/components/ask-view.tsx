@@ -57,7 +57,11 @@ export function AskView() {
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ question: q, profile }),
       });
-      const data = (await res.json()) as Answer | { error: string };
+      const data: Answer | { error: string } = res.headers
+        .get("content-type")
+        ?.includes("application/json")
+        ? await res.json()
+        : { error: "The service is busy right now. Please try your question again in a moment." };
       setTurns((t) =>
         t.map((turn) =>
           turn.id === id

@@ -1,6 +1,12 @@
-import { activeProvider, modelId } from "../provider";
+import { activeProvider, modelChain, modelId } from "../provider";
 
-const KEYS = ["AI_PROVIDER", "GOOGLE_GENERATIVE_AI_API_KEY", "OPENAI_API_KEY", "GEMINI_MODEL"];
+const KEYS = [
+  "AI_PROVIDER",
+  "GOOGLE_GENERATIVE_AI_API_KEY",
+  "OPENAI_API_KEY",
+  "GEMINI_MODEL",
+  "GEMINI_FALLBACK_MODELS",
+];
 
 describe("activeProvider", () => {
   const saved = { ...process.env };
@@ -37,5 +43,21 @@ describe("activeProvider", () => {
     expect(modelId("google")).toBe("gemini-3.8-flash");
     process.env["GEMINI_MODEL"] = "gemini-3.5-flash";
     expect(modelId("google")).toBe("gemini-3.5-flash");
+  });
+
+  it("tries lighter Gemini models after the primary, without duplicates", () => {
+    expect(modelChain("google")).toEqual([
+      "gemini-3.8-flash",
+      "gemini-3.5-flash",
+      "gemini-3.5-flash-lite",
+    ]);
+    process.env["GEMINI_MODEL"] = "gemini-3.5-flash";
+    expect(modelChain("google")).toEqual(["gemini-3.5-flash", "gemini-3.5-flash-lite"]);
+    process.env["GEMINI_FALLBACK_MODELS"] = "";
+    expect(modelChain("google")[0]).toBe("gemini-3.5-flash");
+  });
+
+  it("uses a single OpenAI model", () => {
+    expect(modelChain("openai")).toEqual(["gpt-5.4-mini"]);
   });
 });
