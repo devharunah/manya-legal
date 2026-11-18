@@ -6,7 +6,7 @@ on:
   pull_request:
     branches: [main, staging]
 
-# Attach deploy steps here once a target is chosen (Vercel for most web projects).
+# Deploys: Vercel Git integration builds a preview per PR and production from main.
 
 jobs:
   lint:
@@ -41,12 +41,8 @@ jobs:
     runs-on: ubuntu-latest
     needs: [lint, typecheck, test]
     env:
-      # Optional. The starter page does not read Supabase, so e2e stays green
-      # until a project wires these up in Settings -> Secrets and variables.
-      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL || 'http://127.0.0.1:54321' }}
-      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
-      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      # e2e never calls OpenAI: /api/ask answers from a deterministic fixture when E2E_MOCK_LLM is set.
+      E2E_MOCK_LLM: "1"
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup
