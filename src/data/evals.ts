@@ -54,6 +54,41 @@ export const EVALS: EvalCase[] = [
     reviewNotes: "Anyone with income-generating activity must register; how to apply online.",
   },
   {
+    id: "regression-where-licence",
+    question: "Where do I get a trading licence?",
+    expect: "answer",
+    mustRetrieve: ["tla-s9"],
+    reviewNotes:
+      "KCCA in Kampala (town clerk / district elsewhere under s.9). Was wrongly refused.",
+  },
+  {
+    id: "regression-documents-open-shop",
+    question: "What documents do I need to open a shop?",
+    expect: "answer",
+    mustRetrieve: ["ura-licence-requirements"],
+    reviewNotes: "Lists URSB, TIN and trading licence documents. Was wrongly refused.",
+  },
+  {
+    id: "regression-start-business",
+    question: "How do I start a business in Kampala?",
+    expect: "answer",
+    mustRetrieve: ["ura-formal-business"],
+    reviewNotes: "Three registrations: URSB, TIN, KCCA licence.",
+  },
+  {
+    id: "regression-who-issues",
+    question: "Who issues trading licences?",
+    expect: "answer",
+    mustRetrieve: ["tla-s9"],
+    reviewNotes: "Licensing authority under s.9; KCCA in Kampala.",
+  },
+  {
+    id: "out-of-scope-eviction",
+    question: "Can my landlord evict me without notice?",
+    expect: "refuse",
+    reviewNotes: "Tenancy law is not in the knowledge base yet.",
+  },
+  {
     id: "out-of-scope-divorce",
     question: "How do I file for divorce?",
     expect: "refuse",

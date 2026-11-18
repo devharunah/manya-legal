@@ -3,7 +3,7 @@ import { optionalEnv } from "@/lib/env";
 export type Provider = "google" | "openai";
 
 export const DEFAULT_MODELS: Record<Provider, string> = {
-  google: "gemini-2.5-flash",
+  google: "gemini-3.8-flash",
   openai: "gpt-5.4-mini",
 };
 

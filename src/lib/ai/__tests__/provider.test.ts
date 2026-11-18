@@ -34,7 +34,7 @@ describe("activeProvider", () => {
   });
 
   it("lets GEMINI_MODEL override the default", () => {
-    expect(modelId("google")).toBe("gemini-2.5-flash");
+    expect(modelId("google")).toBe("gemini-3.8-flash");
     process.env["GEMINI_MODEL"] = "gemini-3.5-flash";
     expect(modelId("google")).toBe("gemini-3.5-flash");
   });
