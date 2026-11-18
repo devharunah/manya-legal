@@ -39,9 +39,13 @@ export async function POST(req: Request) {
 
   const prompt = buildPrompt(question, profile, retrieval.hits);
   const started = Date.now();
-  for (const { id, model } of getModels()) {
+  const models = getModels();
+  for (const [index, { id, model }] of models.entries()) {
     const remaining = BUDGET_MS - (Date.now() - started);
     if (remaining < 3_000) break;
+    // Earlier models get a short slot so a busy one can't starve the rest;
+    // the last model gets whatever budget is left.
+    const isLast = index === models.length - 1;
     try {
       const { object } = await generateObject({
         model,
@@ -50,7 +54,9 @@ export async function POST(req: Request) {
         instructions: INSTRUCTIONS,
         prompt,
         maxRetries: 0,
-        abortSignal: AbortSignal.timeout(Math.min(ATTEMPT_MS, remaining)),
+        // Reasoning models answer faster with low effort; the chunks do the work.
+        providerOptions: { openai: { reasoningEffort: "low" } },
+        abortSignal: AbortSignal.timeout(isLast ? remaining : Math.min(ATTEMPT_MS, remaining)),
       });
       return Response.json(validateModelAnswer(object, retrieval.hits));
     } catch (error) {
