@@ -124,7 +124,10 @@ export function refusal(): Answer {
  * is configured, when the model call fails, and in e2e tests.
  */
 export function sourcesOnly(hits: RetrievedChunk[]): Answer {
-  const top = hits.slice(0, 4);
+  // Without a model to explain currency, show current material before older text.
+  const rank = (h: RetrievedChunk) =>
+    (h.chunk.currency ?? h.source.currency) === "historical" ? 1 : 0;
+  const top = [...hits].sort((a, b) => rank(a) - rank(b)).slice(0, 4);
   return {
     status: "partial",
     mode: "sources-only",

@@ -1,13 +1,104 @@
 @import "tailwindcss";
 
+@theme {
+  --font-sans: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-fraunces), ui-serif, Georgia, serif;
+
+  /* Justice purple and gold, after the JLOS Justice Week identity. */
+  --color-brand-50: #f7f1fa;
+  --color-brand-100: #eedff4;
+  --color-brand-200: #dcbfe8;
+  --color-brand-300: #c194d6;
+  --color-brand-400: #a066be;
+  --color-brand-500: #8444a3;
+  --color-brand-600: #6d3389;
+  --color-brand-700: #5a2871;
+  --color-brand-800: #47205a;
+  --color-brand-900: #2e1239;
+  --color-brand-950: #1e0a26;
+
+  --color-gold-50: #fdf8eb;
+  --color-gold-100: #f9edc8;
+  --color-gold-200: #f2d98d;
+  --color-gold-300: #e9c053;
+  --color-gold-400: #dea92f;
+  --color-gold-500: #c88b1a;
+  --color-gold-600: #a86a13;
+  --color-gold-700: #864f14;
+
+  --color-ink: #1d1626;
+  --color-muted: #6b6274;
+  --color-paper: #fbf9fc;
+  --color-line: #ebe4ef;
+}
+
 :root {
   color-scheme: light;
-  font-family: Arial, Helvetica, sans-serif;
-  background: #f5f6f2;
-  color: #10251f;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
   min-height: 100vh;
   margin: 0;
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: var(--color-gold-200);
+  color: var(--color-brand-950);
+}
+
+.bg-grain {
+  background-image: radial-gradient(circle at 15% 10%, rgb(200 139 26 / 0.18), transparent 40%),
+    radial-gradient(circle at 85% 0%, rgb(132 68 163 / 0.35), transparent 45%),
+    linear-gradient(160deg, var(--color-brand-900), var(--color-brand-950));
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.animate-rise {
+  animation: rise 0.35s ease-out both;
+}
+
+@keyframes pulse-dot {
+  0%,
+  80%,
+  100% {
+    opacity: 0.25;
+  }
+  40% {
+    opacity: 1;
+  }
+}
+
+.dot {
+  animation: pulse-dot 1.2s infinite ease-in-out both;
+}
+.dot:nth-child(2) {
+  animation-delay: 0.15s;
+}
+.dot:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-rise,
+  .dot {
+    animation: none;
+  }
 }
