@@ -17,7 +17,9 @@ export const KEY_VARS: Record<Provider, string> = {
  * preferring Gemini (it has a free tier). Null when no key is set.
  */
 export function activeProvider(): Provider | null {
-  const forced = process.env["AI_PROVIDER"];
+  // Values pasted through some shells arrive with a BOM, spaces or capitals;
+  // String.prototype.trim strips the BOM (U+FEFF) along with whitespace.
+  const forced = process.env["AI_PROVIDER"]?.trim().toLowerCase();
   if (forced === "google" || forced === "openai") {
     return process.env[KEY_VARS[forced]] ? forced : null;
   }

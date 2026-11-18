@@ -60,4 +60,12 @@ describe("activeProvider", () => {
   it("uses a single OpenAI model", () => {
     expect(modelChain("openai")).toEqual(["gpt-5.4-mini"]);
   });
+
+  it("reads AI_PROVIDER despite a BOM, whitespace or capitals", () => {
+    process.env["GOOGLE_GENERATIVE_AI_API_KEY"] = "g";
+    process.env["OPENAI_API_KEY"] = "o";
+    process.env["AI_PROVIDER"] = `${String.fromCharCode(0xfeff)} OpenAI 
+`;
+    expect(activeProvider()).toBe("openai");
+  });
 });
