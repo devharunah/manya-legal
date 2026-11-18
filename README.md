@@ -23,7 +23,7 @@ question + business profile (browser only)
 BM25 retrieval over curated official sources ── out of scope? ──► refuse + legal-aid referral
         │                                                         (no AI call)
         ▼
-OpenAI via Vercel AI SDK, generateObject with a strict schema
+Gemini (free tier) or OpenAI via Vercel AI SDK, generateObject with a strict schema
 (answer only from the chunks; cite chunk ids; never invent fees, fines or sections)
         │
         ▼
@@ -43,13 +43,13 @@ next steps · what to double-check · sources · where to get help
 | `src/app/api/ask/route.ts` | The pipeline |
 | `src/components/` | Answer card, source drawer, profile form, ask view |
 
-Without `OPENAI_API_KEY`, or if the model call fails, the app still runs. It shows the matching official provisions directly instead of an explanation.
+Without an AI key, or if the model call fails (for example a free-tier quota is hit), the app still runs. It shows the matching official provisions directly instead of an explanation.
 
 ## Run it
 
 ```bash
 pnpm install
-cp .env.example .env.local   # add OPENAI_API_KEY
+cp .env.example .env.local   # add GOOGLE_GENERATIVE_AI_API_KEY (free) or OPENAI_API_KEY
 pnpm dev
 ```
 
@@ -57,7 +57,9 @@ pnpm dev
 
 ## Deploy
 
-The repository is connected to the Vercel project `manya-legal`. Each PR gets a preview deployment and `main` deploys to production. Set `OPENAI_API_KEY` (and optionally `OPENAI_MODEL`) in the Vercel project's environment variables.
+The repository is connected to the Vercel project `manya-legal`. Each PR gets a preview deployment and `main` deploys to production. Set `GOOGLE_GENERATIVE_AI_API_KEY` (free key from Google AI Studio) or `OPENAI_API_KEY` in the Vercel project's environment variables, then redeploy.
+
+**Gemini free tier:** limits are low and can change without notice. Google may use free-tier prompts to improve its products; we only send the question, the business profile and public legal text, never personal ID data. Use a paid tier for anything beyond a demo.
 
 ## Sources and their limits
 
