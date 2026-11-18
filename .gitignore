@@ -9,3 +9,7 @@ test-results/
 playwright-report/
 .playwright/
 next-env.d.ts
+
+.vercel
+.env*
+!.env.example
