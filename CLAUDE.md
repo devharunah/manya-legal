@@ -19,7 +19,7 @@ cover a question; we are not a substitute for a lawyer; collect only the minimum
 - Framework: Next.js 16, App Router
 - Language: TypeScript, strict
 - UI: React 19, Tailwind CSS v4 through PostCSS
-- AI: Vercel AI SDK (`ai`, `@ai-sdk/openai`), `generateObject` with Zod schemas
+- AI: Vercel AI SDK (`ai`, `@ai-sdk/google` or `@ai-sdk/openai`, picked by which key is set), `generateObject` with Zod schemas
 - Data: curated JSON knowledge base + in-repo BM25 retriever. No database in the MVP
 - Package manager: pnpm, pinned in `packageManager`
 
@@ -29,7 +29,7 @@ cover a question; we are not a substitute for a lawyer; collect only the minimum
 |---|---|
 | `src/app/` | Routes, layouts and pages |
 | `src/lib/` | Pure modules: retrieval, prompts, validation |
-| `src/lib/ai/model.ts` | OpenAI model, built per request so builds run without a key |
+| `src/lib/ai/model.ts` | Gemini or OpenAI model, built per request so builds run without a key |
 | `src/data/kb/` | Curated legal sources, one chunk per provision or FAQ answer, with `asOf` dates |
 | `src/lib/env.ts` | `requireEnv`. Every environment variable goes through it |
 | `next.config.ts` | Next config. Typed, and where `typedRoutes` and `typedEnv` are switched on |
@@ -46,7 +46,7 @@ fails at the point of use with a message naming the variable and pointing at `.e
 Add every new variable to `.env.example` in the same commit as the code that reads it. A variable
 that only exists in someone's `.env.local` does not exist.
 
-`OPENAI_API_KEY` is server only. Never import `src/lib/ai/model.ts` from a client component.
+`GOOGLE_GENERATIVE_AI_API_KEY` and `OPENAI_API_KEY` are server only. Never import `src/lib/ai/model.ts` from a client component.
 
 ## TypeScript
 

@@ -21,6 +21,7 @@
     "onlyBuiltDependencies": ["@biomejs/biome", "unrs-resolver"]
   },
   "dependencies": {
+    "@ai-sdk/google": "^4.0.122",
     "@ai-sdk/openai": "^4.0.121",
     "ai": "^7.0.176",
     "clsx": "^2.1.1",
