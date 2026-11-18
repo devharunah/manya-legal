@@ -2,19 +2,25 @@
 
 # CLAUDE.md
 
-> Replace the bracketed parts with your project's own. Everything else is the template's
-> standing contract and is meant to survive.
-
 ## Project context
 
-**[Project name]** is [one sentence on what it is and who it serves].
+**Manya Legal (SME Legal Companion)** explains Ugandan business law in plain language to small
+business owners, starting with a Kikuubo general retailer and trading-licence compliance. Built for
+JLOS Hack4Justice 2026, track "SME legal support".
+
+**Non-negotiables (from the product brief):** answers are grounded only in the curated knowledge
+base in `src/data/kb/`; never invent Acts, sections, fines or procedures; every legal statement
+carries a citation; separate what the law requires from how it may apply; say when sources don't
+cover a question; we are not a substitute for a lawyer; collect only the minimum business profile
+(kept in the browser, not a database).
 
 **Stack**
 
 - Framework: Next.js 16, App Router
 - Language: TypeScript, strict
 - UI: React 19, Tailwind CSS v4 through PostCSS
-- Data: Supabase, via `@supabase/ssr`
+- AI: Vercel AI SDK (`ai`, `@ai-sdk/openai`), `generateObject` with Zod schemas
+- Data: curated JSON knowledge base + in-repo BM25 retriever. No database in the MVP
 - Package manager: pnpm, pinned in `packageManager`
 
 **Layout**
@@ -22,9 +28,9 @@
 | Path | What lives there |
 |---|---|
 | `src/app/` | Routes, layouts and pages |
-| `src/lib/` | Pure modules and the Supabase clients |
-| `src/lib/supabase/server.ts` | Server client. Reads cookies through `next/headers` |
-| `src/lib/supabase/browser.ts` | Browser client |
+| `src/lib/` | Pure modules: retrieval, prompts, validation |
+| `src/lib/ai/model.ts` | OpenAI model, built per request so builds run without a key |
+| `src/data/kb/` | Curated legal sources, one chunk per provision or FAQ answer, with `asOf` dates |
 | `src/lib/env.ts` | `requireEnv`. Every environment variable goes through it |
 | `next.config.ts` | Next config. Typed, and where `typedRoutes` and `typedEnv` are switched on |
 | `eslint.config.ts` | ESLint flat config. TypeScript, loaded through `jiti` |
@@ -40,8 +46,7 @@ fails at the point of use with a message naming the variable and pointing at `.e
 Add every new variable to `.env.example` in the same commit as the code that reads it. A variable
 that only exists in someone's `.env.local` does not exist.
 
-The service role key is server only. If a file that imports it is reachable from a client
-component, that key ships to the browser.
+`OPENAI_API_KEY` is server only. Never import `src/lib/ai/model.ts` from a client component.
 
 ## TypeScript
 
@@ -74,7 +79,7 @@ commit it back.
 
 This is the line that decides where a test goes:
 
-- **Jest** covers pure modules. No DOM that matters, no network, no Supabase.
+- **Jest** covers pure modules. No DOM that matters, no network, no LLM.
 - **Playwright** covers anything that renders, fetches or runs on the server. It boots the real
   app, so it is the only place that can prove a Server Action actually runs. A `"use server"`
   module typechecks cleanly and still fails the first time a person presses submit.
