@@ -36,3 +36,17 @@ export function modelId(provider: Provider): string {
     DEFAULT_MODELS[provider],
   );
 }
+
+/** Lighter Gemini models to try, in order, when the primary is overloaded or unavailable. */
+export const DEFAULT_GEMINI_FALLBACKS = ["gemini-3.5-flash", "gemini-3.5-flash-lite"];
+
+/** The model ids to try for this request, primary first, without duplicates. */
+export function modelChain(provider: Provider): string[] {
+  const primary = modelId(provider);
+  if (provider !== "google") return [primary];
+  const fallbacks = optionalEnv("GEMINI_FALLBACK_MODELS", DEFAULT_GEMINI_FALLBACKS.join(","))
+    .split(",")
+    .map((m) => m.trim())
+    .filter(Boolean);
+  return [...new Set([primary, ...fallbacks])];
+}
