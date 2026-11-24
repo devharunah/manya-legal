@@ -15,10 +15,18 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 
-import type { Answer, CitedSource } from "@/lib/answer/types";
+import { toAnswerText } from "@/lib/answer/text";
+import type { Answer, AnswerText, CitedSource, LugandaAnswer } from "@/lib/answer/types";
 
 import { CurrencyBadge } from "./currency-badge";
 import { SourceDrawer } from "./source-drawer";
+import { SpeakButton } from "./voice/speak-button";
+
+/** Where the Luganda version of an answer has got to. */
+export type Translation =
+  | { status: "loading" }
+  | ({ status: "ready" } & LugandaAnswer)
+  | { status: "failed"; error: string };
 
 const STATUS = {
   answered: {
@@ -71,12 +79,80 @@ function CitePill({ n, onClick }: { n: number; onClick: () => void }) {
   );
 }
 
-export function AnswerCard({ answer }: { answer: Answer }) {
+function LanguageToggle({
+  lang,
+  onChange,
+}: {
+  lang: "lug" | "en";
+  onChange: (lang: "lug" | "en") => void;
+}) {
+  return (
+    <fieldset className="inline-flex rounded-xl bg-brand-50 p-1 text-xs font-semibold">
+      <legend className="sr-only">Answer language</legend>
+      {(["lug", "en"] as const).map((l) => (
+        <button
+          key={l}
+          type="button"
+          aria-pressed={lang === l}
+          onClick={() => onChange(l)}
+          className={`rounded-lg px-3 py-1.5 transition ${lang === l ? "bg-white text-brand-900 shadow-sm" : "text-brand-700/70"}`}
+        >
+          {l === "lug" ? "Oluganda" : "English"}
+        </button>
+      ))}
+    </fieldset>
+  );
+}
+
+function TranslationNotice({ translation }: { translation: Translation }) {
+  if (translation.status === "loading") {
+    return (
+      <output className="flex items-center gap-2 rounded-2xl bg-brand-50 px-4 py-3 text-sm text-brand-800">
+        <span className="flex gap-1" aria-hidden>
+          <span className="dot size-1.5 rounded-full bg-brand-500" />
+          <span className="dot size-1.5 rounded-full bg-brand-500" />
+          <span className="dot size-1.5 rounded-full bg-brand-500" />
+        </span>
+        Translating into Luganda… The English answer is below in the meantime.
+      </output>
+    );
+  }
+  if (translation.status === "failed") {
+    return (
+      <output className="block rounded-2xl bg-gold-50 px-4 py-3 text-sm text-gold-700">
+        {translation.error} Showing the answer in English.
+      </output>
+    );
+  }
+  return (
+    <p className="rounded-2xl bg-gold-50 px-4 py-3 text-sm leading-6 text-gold-700">
+      <strong>Machine translation (Sunbird AI).</strong> Legal words can come out wrong, for example
+      a &quot;fine&quot; may be translated as a &quot;tax&quot;. Check the English version before
+      you act.
+      {translation.keptInEnglish > 0 &&
+        ` ${translation.keptInEnglish} line${translation.keptInEnglish > 1 ? "s were" : " was"} left in English because a number did not survive translation.`}
+    </p>
+  );
+}
+
+export function AnswerCard({
+  answer,
+  translation,
+  voice = false,
+}: {
+  answer: Answer;
+  translation?: Translation;
+  voice?: boolean;
+}) {
   const [view, setView] = useState<"plain" | "law">("plain");
   const [open, setOpen] = useState<number | null>(null);
+  const [lang, setLang] = useState<"lug" | "en">("lug");
   const status = STATUS[answer.status];
   const indexOf = new Map(answer.sources.map((s, i) => [s.chunkId, i + 1]));
   const openSource: CitedSource | undefined = open === null ? undefined : answer.sources[open - 1];
+  const inLuganda = translation?.status === "ready" && lang === "lug";
+  const text: AnswerText = inLuganda ? translation.text : toAnswerText(answer);
+  const canSpeak = voice && inLuganda;
 
   return (
     <article
@@ -89,6 +165,7 @@ export function AnswerCard({ answer }: { answer: Answer }) {
         >
           <status.Icon className="size-3.5" aria-hidden /> {status.label}
         </span>
+        {translation?.status === "ready" && <LanguageToggle lang={lang} onChange={setLang} />}
         {answer.sources.length > 0 && (
           <div
             className="inline-flex rounded-xl bg-brand-50 p-1 text-xs font-semibold"
@@ -117,22 +194,28 @@ export function AnswerCard({ answer }: { answer: Answer }) {
       </header>
 
       {view === "plain" ? (
-        <div className="space-y-7 p-5 sm:p-7">
+        <div className="space-y-7 p-5 sm:p-7" lang={inLuganda ? "lg" : "en"}>
+          {translation && (translation.status !== "ready" || lang === "lug") && (
+            <TranslationNotice translation={translation} />
+          )}
+
           <p className="font-display text-xl leading-8 font-medium text-brand-950 sm:text-[22px]">
-            {answer.directAnswer}
+            {text.directAnswer}
           </p>
+
+          {canSpeak && <SpeakButton pieces={translation.speech.all} label="Wuliriza (listen)" />}
 
           {answer.lawSays.length > 0 && (
             <Section icon={Gavel} title="What the law says">
               <ul className="space-y-2.5">
-                {answer.lawSays.map((item) => (
-                  <li key={item.point} className="flex gap-3">
+                {answer.lawSays.map((item, i) => (
+                  <li key={`${i}-${item.point}`} className="flex gap-3">
                     <span
                       className="mt-2.5 size-1.5 shrink-0 rounded-full bg-gold-400"
                       aria-hidden
                     />
                     <span>
-                      {item.point}{" "}
+                      {text.lawSays[i] ?? item.point}{" "}
                       {item.supported ? (
                         item.chunkIds.map((id) => {
                           const n = indexOf.get(id);
@@ -150,16 +233,24 @@ export function AnswerCard({ answer }: { answer: Answer }) {
             </Section>
           )}
 
-          {answer.meansForYou && (
+          {text.meansForYou && (
             <Section icon={Briefcase} title="What it means for your business">
-              <p>{answer.meansForYou}</p>
+              <p>{text.meansForYou}</p>
             </Section>
           )}
 
-          {answer.nextSteps.length > 0 && (
+          {text.nextSteps.length > 0 && (
             <Section icon={ListChecks} title="What you should do">
+              {canSpeak && (
+                <div className="mb-3">
+                  <SpeakButton
+                    pieces={translation.speech.steps}
+                    label="Wuliriza ebiddako (listen to the steps)"
+                  />
+                </div>
+              )}
               <ol className="space-y-2">
-                {answer.nextSteps.map((step, i) => (
+                {text.nextSteps.map((step, i) => (
                   <li key={step} className="flex gap-3">
                     <span className="grid size-6 shrink-0 place-items-center rounded-full bg-brand-800 text-xs font-bold text-white">
                       {i + 1}
@@ -171,23 +262,23 @@ export function AnswerCard({ answer }: { answer: Answer }) {
             </Section>
           )}
 
-          {answer.clarifyingQuestions.length > 0 && (
+          {text.clarifyingQuestions.length > 0 && (
             <Section icon={CircleHelp} title="This could change if…">
               <ul className="list-disc space-y-1 pl-5 text-muted">
-                {answer.clarifyingQuestions.map((q) => (
+                {text.clarifyingQuestions.map((q) => (
                   <li key={q}>{q}</li>
                 ))}
               </ul>
             </Section>
           )}
 
-          {(answer.uncertainty || answer.warnings.length > 0) && (
+          {(text.uncertainty || text.warnings.length > 0) && (
             <div className="space-y-2 rounded-2xl bg-gold-50 p-4 text-sm leading-6 text-gold-700">
               <p className="flex items-center gap-2 font-semibold">
                 <AlertTriangle className="size-4" aria-hidden /> What to double-check
               </p>
-              {answer.uncertainty && <p>{answer.uncertainty}</p>}
-              {answer.warnings.map((w) => (
+              {text.uncertainty && <p>{text.uncertainty}</p>}
+              {text.warnings.map((w) => (
                 <p key={w}>{w}</p>
               ))}
             </div>
@@ -207,6 +298,8 @@ export function AnswerCard({ answer }: { answer: Answer }) {
         <div className="space-y-4 p-5 sm:p-7">
           <p className="text-sm text-muted">
             The exact text behind this answer. Compare it with the plain-language version.
+            {translation &&
+              " The law is shown as written, in English. We never machine-translate it."}
           </p>
           {answer.sources.map((s, i) => (
             <figure key={s.chunkId} className="rounded-2xl border border-line p-4">

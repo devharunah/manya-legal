@@ -6,9 +6,12 @@ import { type FormEvent, useEffect, useRef, useState } from "react";
 
 import type { Answer } from "@/lib/answer/types";
 import { DEMO_PROFILE } from "@/lib/profile";
+import { useLanguage } from "@/lib/use-language";
 import { useIsDemo, useProfile } from "@/lib/use-profile";
 
-import { AnswerCard } from "./answer-card";
+import { AnswerCard, type Translation } from "./answer-card";
+import { answerToLuganda, questionToEnglish } from "./voice/api";
+import { MicButton } from "./voice/mic-button";
 
 export const SUGGESTIONS = [
   "What do I need to legally operate my retail shop in Kampala?",
@@ -20,15 +23,40 @@ export const SUGGESTIONS = [
 interface Turn {
   id: number;
   question: string;
+  /** What we searched our sources for, when the question was asked in Luganda. */
+  english?: string;
+  stage?: "translating" | "answering";
   answer?: Answer;
+  translation?: Translation;
   error?: string;
 }
 
-export function AskView() {
+const failMessage = (e: unknown, fallback: string) => (e instanceof Error ? e.message : fallback);
+
+/** Asks our checked English pipeline. Returns the answer, or an error message for the trader. */
+async function fetchAnswer(
+  question: string,
+  profile: unknown,
+): Promise<Answer | { error: string }> {
+  const res = await fetch("/api/ask", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ question, profile }),
+  });
+  return res.headers.get("content-type")?.includes("application/json")
+    ? await res.json()
+    : { error: "The service is busy right now. Please try your question again in a moment." };
+}
+
+export function AskView({ voice = false }: { voice?: boolean }) {
   const { profile, loaded, save } = useProfile();
   const [turns, setTurns] = useState<Turn[]>([]);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
+  const [storedLang, setLang] = useLanguage();
+  const [voiceError, setVoiceError] = useState<string | null>(null);
+  // Luganda needs the speech service for translation; without it, English only.
+  const lang = voice ? storedLang : "en";
   const endRef = useRef<HTMLDivElement>(null);
   const nextId = useRef(0);
   const isDemo = useIsDemo();
@@ -43,45 +71,60 @@ export function AskView() {
     if (turnCount > 0) endRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
   }, [turnCount]);
 
+  function update(id: number, patch: Partial<Turn>) {
+    setTurns((t) => t.map((turn) => (turn.id === id ? { ...turn, ...patch } : turn)));
+  }
+
+  /** Runs after the English answer is on screen, so the trader never waits on it. */
+  async function translateAnswer(id: number, answer: Answer) {
+    const pending = answerToLuganda(answer);
+    if (!pending) return;
+    update(id, { translation: { status: "loading" } });
+    try {
+      const result = await pending;
+      update(id, { translation: { status: "ready", ...result } });
+    } catch (e) {
+      update(id, {
+        translation: {
+          status: "failed",
+          error: failMessage(e, "The Luganda version isn't available right now."),
+        },
+      });
+    }
+  }
+
   async function ask(question: string) {
     const q = question.trim();
     if (!q || busy || !profile) return;
     nextId.current += 1;
     const id = nextId.current;
-    setTurns((t) => [...t, { id, question: q }]);
+    const luganda = lang === "lug";
+    setTurns((t) => [...t, { id, question: q, stage: luganda ? "translating" : "answering" }]);
     setInput("");
+    setVoiceError(null);
     setBusy(true);
     try {
-      const res = await fetch("/api/ask", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ question: q, profile }),
-      });
-      const data: Answer | { error: string } = res.headers
-        .get("content-type")
-        ?.includes("application/json")
-        ? await res.json()
-        : { error: "The service is busy right now. Please try your question again in a moment." };
-      setTurns((t) =>
-        t.map((turn) =>
-          turn.id === id
-            ? "error" in data
-              ? { ...turn, error: data.error }
-              : { ...turn, answer: data }
-            : turn,
-        ),
-      );
+      // Our sources and refusal gate work in English, so a Luganda question is
+      // translated first and the trader sees what we actually searched for.
+      let english = q;
+      if (luganda) {
+        try {
+          english = await questionToEnglish(q);
+        } catch (e) {
+          update(id, { error: failMessage(e, "We couldn't translate your question.") });
+          return;
+        }
+        update(id, { english, stage: "answering" });
+      }
+      const data = await fetchAnswer(english, profile);
+      if ("error" in data) {
+        update(id, { error: data.error });
+        return;
+      }
+      update(id, { answer: data });
+      if (luganda) void translateAnswer(id, data);
     } catch {
-      setTurns((t) =>
-        t.map((turn) =>
-          turn.id === id
-            ? {
-                ...turn,
-                error: "We couldn't reach the server. Check your connection and try again.",
-              }
-            : turn,
-        ),
-      );
+      update(id, { error: "We couldn't reach the server. Check your connection and try again." });
     } finally {
       setBusy(false);
     }
@@ -192,13 +235,25 @@ export function AskView() {
           <div className="flex-1 space-y-8 pb-6">
             {turns.map((turn) => (
               <div key={turn.id} className="space-y-4">
-                <div className="flex justify-end">
+                <div className="flex flex-col items-end gap-1.5">
                   <p className="max-w-[85%] rounded-2xl rounded-tr-sm bg-brand-800 px-4 py-3 text-white shadow-sm">
                     {turn.question}
                   </p>
+                  {turn.english && turn.english !== turn.question && (
+                    <p
+                      className="max-w-[85%] text-right text-xs text-muted"
+                      data-testid="understood"
+                    >
+                      We searched our sources for: <em>{turn.english}</em>
+                    </p>
+                  )}
                 </div>
                 {turn.answer ? (
-                  <AnswerCard answer={turn.answer} />
+                  <AnswerCard
+                    answer={turn.answer}
+                    voice={voice}
+                    {...(turn.translation ? { translation: turn.translation } : {})}
+                  />
                 ) : turn.error ? (
                   <p role="alert" className="rounded-2xl bg-red-50 px-4 py-3 text-sm text-red-800">
                     {turn.error}
@@ -210,7 +265,9 @@ export function AskView() {
                       <span className="dot size-2 rounded-full bg-brand-500" />
                       <span className="dot size-2 rounded-full bg-brand-500" />
                     </span>
-                    Checking official sources and writing a plain answer…
+                    {turn.stage === "translating"
+                      ? "Translating your question into English to search our sources…"
+                      : "Checking official sources and writing a plain answer…"}
                   </div>
                 )}
               </div>
@@ -223,10 +280,42 @@ export function AskView() {
           onSubmit={submit}
           className="sticky bottom-0 -mx-4 mt-4 border-t border-line bg-paper/90 px-4 pt-3 pb-4 backdrop-blur sm:mx-0 sm:rounded-2xl sm:border sm:bg-white sm:p-2 sm:shadow-lg"
         >
+          {voice && (
+            <div className="mb-2 flex flex-wrap items-center justify-between gap-2 px-1">
+              <fieldset className="inline-flex rounded-xl bg-brand-50 p-1 text-xs font-semibold">
+                <legend className="sr-only">Answer language</legend>
+                {(["en", "lug"] as const).map((l) => (
+                  <button
+                    key={l}
+                    type="button"
+                    aria-pressed={lang === l}
+                    onClick={() => setLang(l)}
+                    className={`rounded-lg px-3 py-1 transition ${lang === l ? "bg-white text-brand-900 shadow-sm" : "text-brand-700/70"}`}
+                  >
+                    {l === "lug" ? "Oluganda" : "English"}
+                  </button>
+                ))}
+              </fieldset>
+              <span className="text-[11px] text-muted">
+                Tap the microphone to ask in Luganda (up to 30 seconds).
+              </span>
+            </div>
+          )}
           <label htmlFor="question" className="sr-only">
             Your question
           </label>
           <div className="flex items-end gap-2">
+            {voice && (
+              <MicButton
+                disabled={busy || !profile}
+                onError={setVoiceError}
+                onTranscript={(text) => {
+                  // The trader reads and can fix this before anything is asked.
+                  setInput(text);
+                  setLang("lug");
+                }}
+              />
+            )}
             <textarea
               id="question"
               rows={1}
@@ -251,9 +340,16 @@ export function AskView() {
               <ArrowUp className="size-5" />
             </button>
           </div>
+          {voiceError && (
+            <p role="alert" className="mt-2 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-800">
+              {voiceError}
+            </p>
+          )}
           <p className="mt-2 px-1 text-[11px] text-muted">
             Legal information, not legal advice. Don&apos;t share ID numbers or other personal
             details.
+            {voice &&
+              " Voice notes and Luganda text are sent to Sunbird AI to transcribe and translate; Sunbird may keep a copy. We don't store them."}
           </p>
         </form>
       </section>
