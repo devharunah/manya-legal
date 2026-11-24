@@ -1,6 +1,8 @@
-import { generateText } from "ai";
+import { createOpenAI } from "@ai-sdk/openai";
+import { experimental_transcribe, generateText } from "ai";
 
 import { getModels } from "@/lib/ai/model";
+import { optionalEnv } from "@/lib/env";
 
 import { type VoiceLanguage, type VoiceProvider, VoiceServiceError } from "./types";
 
@@ -34,6 +36,26 @@ export function createModelVoice(): Pick<VoiceProvider, "transcribe" | "translat
   return {
     async transcribe(audio, language = "lug") {
       const bytes = new Uint8Array(await audio.arrayBuffer());
+      // A dedicated speech model first, when OpenAI is configured.
+      const openaiKey = optionalEnv("OPENAI_API_KEY", "");
+      if (openaiKey) {
+        try {
+          const { text } = await experimental_transcribe({
+            model: createOpenAI({ apiKey: openaiKey }).transcription("gpt-4o-mini-transcribe"),
+            audio: bytes,
+            maxRetries: 0,
+            abortSignal: AbortSignal.timeout(25_000),
+            // Luganda isn't a listed language there, so only English is pinned.
+            ...(language === "eng" ? { providerOptions: { openai: { language: "en" } } } : {}),
+          });
+          if (text.trim()) return text.trim();
+        } catch (error) {
+          console.error(
+            "[voice:fallback] openai transcription failed",
+            error instanceof Error ? error.message : error,
+          );
+        }
+      }
       const { text } = await firstThat((model) =>
         generateText({
           model,
