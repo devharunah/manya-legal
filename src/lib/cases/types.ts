@@ -1,4 +1,4 @@
-import type { FieldKey, Intake } from "@/lib/intake/fields";
+import type { Intake } from "@/lib/intake/fields";
 import type { Extraction } from "@/lib/intake/merge";
 
 import type { CaseStatus } from "./state";
@@ -37,8 +37,8 @@ export interface Message {
   processedText: string | null;
   language: Language;
   inputType: "text" | "voice" | "system";
-  /** For MANYA's questions: the field being asked about. */
-  field: FieldKey | null;
+  /** For MANYA's questions: the fields being asked about, comma-separated (older messages hold one). */
+  field: string | null;
   createdAt: string;
 }
 

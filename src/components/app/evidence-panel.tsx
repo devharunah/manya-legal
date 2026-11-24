@@ -17,6 +17,7 @@ import {
   type DocumentExtraction,
   type EvidenceDocument,
 } from "@/lib/cases/types";
+import { DEMO_FILES } from "@/lib/demo/cases";
 import { type ConsistencyFlag, checkConsistency } from "@/lib/evidence/consistency";
 import { useT } from "@/lib/i18n/use-t";
 import { formatDate } from "@/lib/intake/display";
@@ -292,6 +293,21 @@ export function EvidencePanel({
             onUploaded={(d) => update((w) => ({ ...w, documents: [...w.documents, d] }))}
           />
         </div>
+        <details className="mt-3 text-xs text-muted">
+          <summary className="cursor-pointer font-semibold text-brand-700">
+            {t("evidence.samples")}
+          </summary>
+          <ul className="mt-2 space-y-1">
+            {DEMO_FILES.map((file) => (
+              <li key={file}>
+                <a href={`/demo/${file}`} download className="text-brand-700 underline">
+                  {file}
+                </a>
+              </li>
+            ))}
+          </ul>
+          <p className="mt-1">{t("demo.note")}</p>
+        </details>
         {!record.intake.values["transaction.amount"] && (
           <p className="mt-3 text-xs text-muted">{t("evidence.reportFirst")}</p>
         )}

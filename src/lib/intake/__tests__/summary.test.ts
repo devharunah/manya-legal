@@ -20,7 +20,7 @@ describe("AI summary input", () => {
   it("builds a no-AI summary that never fills gaps", () => {
     const text = templateSummary(intake);
     expect(text).toBe(
-      "You reported that you paid Kato Wholesalers UGX 2,000,000. Still missing: complainant name, contact phone, date of payment, goods purchased, type of agreement, delivery status, outcome you want.",
+      "You reported that you paid Kato Wholesalers UGX 2,000,000. Still missing: type of agreement, arbitration clause in the agreement, mediation clause in the agreement, complainant name, contact phone, date of payment, goods purchased, delivery status, outcome you want.",
     );
   });
 });

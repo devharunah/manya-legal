@@ -7,7 +7,7 @@ const nextConfig: NextConfig = {
   // PDF reports embed Noto Sans (handles Luganda ŋ) and the demo loads SAMPLE documents;
   // ship those files with the routes that read them.
   outputFileTracingIncludes: {
-    "/api/**": ["./src/assets/**"],
+    "/api/**": ["./src/assets/**", "./public/demo/**"],
   },
   experimental: {
     // Types the environment variables the dev server loaded, which gives

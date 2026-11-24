@@ -62,7 +62,23 @@ function PathwayCard({ p, onPrepare }: { p: Pathway; onPrepare: (p: PathwayType)
           </p>
         ))}
       </div>
-      <LawSources chunkIds={p.chunkIds} />
+      <div>
+        <p className="text-xs font-semibold uppercase tracking-wide text-muted">
+          {t("resolve.check")}
+        </p>
+        <ul className="mt-1 list-disc space-y-0.5 pl-5">
+          {p.check.map((line) => (
+            <li key={line.key} className="text-sm leading-6 text-ink">
+              {t(line.key)}
+            </li>
+          ))}
+        </ul>
+      </div>
+      {p.chunkIds.length > 0 ? (
+        <LawSources chunkIds={p.chunkIds} />
+      ) : (
+        <p className="text-xs text-muted">{t("resolve.agreementSource")}</p>
+      )}
       {providers.length > 0 && (
         <div className="space-y-2">
           <p className="text-xs font-semibold uppercase tracking-wide text-muted">
@@ -265,6 +281,12 @@ export function ResolvePanel({
       <div className="rounded-3xl border border-line bg-white p-5 shadow-sm">
         <h2 className="font-display text-2xl font-semibold text-brand-900">{t("resolve.title")}</h2>
         <p className="mt-1 text-sm text-muted">{t("resolve.body")}</p>
+        <p
+          className="mt-3 rounded-xl bg-gold-50 p-3 text-xs leading-5 text-gold-700"
+          data-testid="resolve-disclaimer"
+        >
+          {t("resolve.disclaimer")}
+        </p>
       </div>
 
       {referrals.length > 0 && (

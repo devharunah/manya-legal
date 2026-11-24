@@ -4,14 +4,29 @@ import { AlertTriangle, CheckCircle2, Download, FileText, Loader2, Pencil } from
 import { useState } from "react";
 
 import type { CaseRecord, Report } from "@/lib/cases/types";
+import type { MessageKey } from "@/lib/i18n/en";
 import { useT } from "@/lib/i18n/use-t";
-import { displayValue } from "@/lib/intake/display";
-import { FIELDS, type FieldKey, type FieldSpec } from "@/lib/intake/fields";
+import { displayValue, formatDate } from "@/lib/intake/display";
+import { FIELDS, type FieldKey, type FieldSpec, type Stage } from "@/lib/intake/fields";
 import { missingRequired } from "@/lib/intake/progress";
 
 import { CaseSummary } from "./case-summary";
 import { api } from "./client-api";
 import type { WorkspaceUpdate } from "./workspace-types";
+
+/** Stage 6 shows the report the way the conversation collected it. */
+const GROUP_TITLES: [MessageKey, Stage[]][] = [
+  ["review.groupParties", ["parties"]],
+  ["review.groupTransaction", ["transaction", "events"]],
+  ["review.groupAgreement", ["agreement"]],
+  ["review.groupOutcome", ["outcome"]],
+];
+const REVIEW_GROUPS = GROUP_TITLES.map(([title, stages]) => ({
+  title,
+  fields: (FIELDS as readonly FieldSpec[]).filter(
+    (f) => stages.includes(f.stage) && !f.extractOnly,
+  ),
+}));
 
 const input =
   "w-full rounded-lg border border-line bg-white px-3 py-2 text-base outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-200";
@@ -133,7 +148,9 @@ export function ReviewPanel({
       className="rounded-3xl border border-line bg-white p-5 shadow-sm sm:p-6"
     >
       <h2 id="review-title" className="font-display text-2xl font-semibold text-brand-900">
-        {t("review.title")}
+        <p className="mt-1 text-sm text-muted">
+          {t("review.accurate")} {t("review.body")}
+        </p>
       </h2>
       <p className="mt-1 text-sm text-muted">{t("review.body")}</p>
 
@@ -150,62 +167,87 @@ export function ReviewPanel({
         </blockquote>
       )}
 
-      <dl className="mt-5 divide-y divide-line" data-testid="report-fields">
-        {FIELDS.map((spec) => {
-          const key = spec.key;
-          const field = intake.values[key];
-          const unknown = intake.unknown.includes(key);
-          const required = spec.need === "required";
-          return (
-            <div key={key} className="py-3" data-field={key}>
-              <dt className="flex items-center justify-between gap-2 text-xs font-semibold uppercase tracking-wide text-muted">
-                <span>
-                  {t(`field.${key}`)}
-                  {required && <span aria-hidden> *</span>}
-                </span>
-                {editing !== key && (
-                  <button
-                    type="button"
-                    onClick={() => setEditing(key)}
-                    className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-brand-700 normal-case tracking-normal hover:bg-brand-50"
-                  >
-                    <Pencil className="size-3.5" aria-hidden /> {t("review.edit")}
-                    <span className="sr-only"> {t(`field.${key}`)}</span>
-                  </button>
-                )}
-              </dt>
-              <dd className="mt-1">
-                {editing === key ? (
-                  <Editor
-                    spec={spec}
-                    value={field ? String(field.value) : ""}
-                    onSave={(v) => void save(key, v)}
-                    onCancel={() => setEditing(null)}
-                  />
-                ) : field ? (
-                  <>
-                    <span className="text-base font-medium text-ink">
-                      {displayValue(t, key, field)}
-                    </span>
-                    <span className="ml-2 inline-flex items-center gap-1 text-xs text-muted">
-                      {field.confirmed && (
-                        <CheckCircle2 className="size-3 text-emerald-600" aria-hidden />
+      <div className="mt-5 space-y-5" data-testid="report-fields">
+        {REVIEW_GROUPS.map((group) => (
+          <section key={group.title} aria-label={t(group.title)}>
+            <h3 className="text-sm font-semibold text-brand-800">{t(group.title)}</h3>
+            <dl className="mt-1 divide-y divide-line">
+              {group.fields.map((spec) => {
+                const key = spec.key;
+                const field = intake.values[key];
+                const unknown = intake.unknown.includes(key);
+                const required = spec.need === "required";
+                return (
+                  <div key={key} className="py-3" data-field={key}>
+                    <dt className="flex items-center justify-between gap-2 text-xs font-semibold uppercase tracking-wide text-muted">
+                      <span>
+                        {t(`field.${key}`)}
+                        {required && <span aria-hidden> *</span>}
+                      </span>
+                      {editing !== key && (
+                        <button
+                          type="button"
+                          onClick={() => setEditing(key)}
+                          className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-brand-700 normal-case tracking-normal hover:bg-brand-50"
+                        >
+                          <Pencil className="size-3.5" aria-hidden /> {t("review.edit")}
+                          <span className="sr-only"> {t(`field.${key}`)}</span>
+                        </button>
                       )}
-                      {t(`provenance.${field.source}`)}
-                    </span>
-                  </>
-                ) : (
-                  <span
-                    className={`text-sm italic ${required && !unknown ? "text-gold-700" : "text-muted"}`}
-                  >
-                    {unknown ? t("review.unknown") : t("review.notProvided")}
-                  </span>
-                )}
-              </dd>
-            </div>
-          );
-        })}
-      </dl>
+                    </dt>
+                    <dd className="mt-1">
+                      {editing === key ? (
+                        <Editor
+                          spec={spec}
+                          value={field ? String(field.value) : ""}
+                          onSave={(v) => void save(key, v)}
+                          onCancel={() => setEditing(null)}
+                        />
+                      ) : field ? (
+                        <>
+                          <span className="text-base font-medium text-ink">
+                            {displayValue(t, key, field)}
+                          </span>
+                          <span className="ml-2 inline-flex items-center gap-1 text-xs text-muted">
+                            {field.confirmed && (
+                              <CheckCircle2 className="size-3 text-emerald-600" aria-hidden />
+                            )}
+                            {t(`provenance.${field.source}`)}
+                          </span>
+                        </>
+                      ) : (
+                        <span
+                          className={`text-sm italic ${required && !unknown ? "text-gold-700" : "text-muted"}`}
+                        >
+                          {unknown ? t("review.unknown") : t("review.notProvided")}
+                        </span>
+                      )}
+                    </dd>
+                  </div>
+                );
+              })}
+            </dl>
+          </section>
+        ))}
+        {(intake.events ?? []).length > 0 && (
+          <section aria-label={t("review.events")}>
+            <h3 className="text-sm font-semibold text-brand-800">{t("review.events")}</h3>
+            <ol
+              className="mt-2 space-y-1.5 border-l-2 border-brand-100 pl-4 text-sm"
+              data-testid="review-events"
+            >
+              {(intake.events ?? []).map((ev) => (
+                <li key={`${ev.date}-${ev.text}`}>
+                  <span className="font-semibold text-brand-700">
+                    {ev.date ? formatDate(ev.date) : t("evidence.undated")}
+                  </span>{" "}
+                  {ev.text}
+                </li>
+              ))}
+            </ol>
+          </section>
+        )}
+      </div>
 
       {canGenerate && (
         <div className="mt-5 space-y-4 rounded-2xl border border-gold-200 bg-gold-50 p-4">

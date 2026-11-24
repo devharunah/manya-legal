@@ -1,9 +1,9 @@
 import { z } from "zod";
 
 import { fail, json, withStore } from "@/lib/api";
+import { enT } from "@/lib/i18n/translate";
 import { type TraderInput, TranslationError, intakeTurn } from "@/lib/intake/engine";
 import { extractFields } from "@/lib/intake/extract";
-import { FIELD_KEYS, type FieldKey } from "@/lib/intake/fields";
 import { getVoiceProvider, hasVoice } from "@/lib/voice/provider";
 
 export const maxDuration = 60;
@@ -13,7 +13,7 @@ const bodySchema = z.union([
     text: z.string().trim().min(1).max(1500),
     inputType: z.enum(["text", "voice"]),
   }),
-  z.object({ skip: z.enum(FIELD_KEYS as [FieldKey, ...FieldKey[]]) }),
+  z.object({ skip: z.literal(true) }),
 ]);
 
 /** One trader message (or "I don't know") into the guided intake. */
@@ -28,7 +28,7 @@ export const POST = (req: Request, ctx: RouteContext<"/api/cases/[id]/messages">
 
     const input: TraderInput =
       "skip" in parsed.data
-        ? { kind: "skip", field: parsed.data.skip }
+        ? { kind: "skip" }
         : { kind: "message", text: parsed.data.text, inputType: parsed.data.inputType };
     if (record.language === "lug" && input.kind === "message" && !hasVoice()) {
       return fail("Luganda isn't available right now. Please switch to English.", 503);
@@ -38,6 +38,7 @@ export const POST = (req: Request, ctx: RouteContext<"/api/cases/[id]/messages">
       const result = await intakeTurn(store, record, input, {
         extract: extractFields,
         toEnglish: (text) => getVoiceProvider().translate(text, "eng", "lug"),
+        questionText: (key) => enT(key as Parameters<typeof enT>[0]),
       });
       return json(result);
     } catch (error) {

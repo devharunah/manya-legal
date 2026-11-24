@@ -93,8 +93,6 @@ export const lug: Partial<Messages> = {
   "case.progressResolve": "Okusalawo.",
   "case.back": "Emisango gyonna",
   "case.loading": "Okutikka ensonga yo…",
-  "intake.greeting":
-    "Gyebale ko. Nnyamba okunnyonnyola ekyatuuse ku supplier wo, mu bigambo byo byokka. Osobola okuwandiika oba okukwata eddoboozi.",
   "intake.label": "Obubaka bwo",
   "intake.send": "Sindika",
   "intake.skip": "Simanyi.",
@@ -116,24 +114,6 @@ export const lug: Partial<Messages> = {
   "intake.translateError":
     "Tetwasobodde kuvvuunula bubaka bwo. Gezako nate, oba kyusa okugenda mu Lungereza.",
   "intake.heardEnglish": "Soma nga: {n}",
-  "q.complainant.name": "Erinnya lyo ery'okumaliriza lye lyaani?",
-  "q.complainant.business_name": "Erinnya ly'ekitongole kyo ki?",
-  "q.complainant.phone": "Abantu basobola okukutuukirira ku nnamba ki ey'essimu?",
-  "q.respondent.name": "Erinnya ly'omutunzi, oba erinnya ly'ekitongole kyabwe?",
-  "q.respondent.phone": "Olina ennamba y'essimu y'omutunzi?",
-  "q.transaction.date": "Owandiika ddi ssente?",
-  "q.transaction.amount": "Wawaddeyo ssente mmeka?",
-  "q.transaction.currency": "Owasasula mu ssente ki? Ng’ekyokulabirako Uganda shillings.",
-  "q.transaction.goods": "Bintu ki bye wasasulira?",
-  "q.transaction.agreement_type":
-    "Endagaano yali ewandiikiddwa, okuyita ku WhatsApp oba mu bigambo?",
-  "q.delivery.expected_date": "Omutunzi yakugamba olunaku lwennyini lw'anaaleeta ebintu?",
-  "q.delivery.status": "Waliwo ku bintu ebyatuuka?",
-  "q.previous_communication":
-    "Okozeeko okukwatagana n'omugaba w'ebintu okuva lwe wasasula? Kiki ekyaliwo?",
-  "q.requested_resolution": "Kiki ky'oyagala okusinga: okufuna ebintu oba okuddizibwa ssente zo?",
-  "q.arbitration_agreement":
-    "Endagaano yo yagamba nti okusika omuguwa kugenda mu kukkaanya oba mu mutabaganya eyategeerekeka?",
   "field.complainant.name": "Erinnya ly'omuwawabirwa",
   "field.complainant.business_name": "Erinnya ly'ekitongole",
   "field.complainant.phone": "Ennamba y'essimu.",
@@ -148,7 +128,6 @@ export const lug: Partial<Messages> = {
   "field.delivery.status": "Embeera y'okutuusa.",
   "field.previous_communication": "Okugezaako okukigonjoola",
   "field.requested_resolution": "Ekivaamu ky'oyagala",
-  "field.arbitration_agreement": "Ekiragiro ky'okutabaganya oba okukola ng'omutabaganya",
   "choice.transaction.agreement_type.written": "Ekiwandiike",
   "choice.transaction.agreement_type.verbal": "Okwogera.",
   "choice.transaction.agreement_type.whatsapp": "WhatsApp",
@@ -260,16 +239,8 @@ export const lug: Partial<Messages> = {
     "Etteeka ligamba nti omusuubuzi ateekeddwa okuwaayo ebintu omuguzi bye yasasulira. Enkaayana nnyingi ziggwa nga omusasuubuzi ajjukiziddwa kino mu buwandiike.",
   "pathway.negotiation.steps":
     "Wandiika eri omuguzi mu buwandiike (WhatsApp oba ebbaluwa). Yogera ky'osasudde, ddi, era musabe okukuleetera ebintu oba okuddiza ssente ku lunaku olulambikiddwa bulungi. Kuumira kopi y'ebintu byonna.",
-  "pathway.mediation.why":
-    "Omuntu atalina ludda lw'awagira ayamba enjuyi zombi okutuuka ku kutegeeragana kwazo. Tewali muntu akakibwa kukkiriza ekivaamu.",
-  "pathway.mediation.steps":
-    "Obuweereza bw’obuyambi mu mateeka nga Justice Centres Uganda ne Uganda Law Society bawadde obukulembeze. Singa omusango gutwalibwa mu kkooti, enjuyi zombi ziyinza okukkaanya ku buweereza bw’okutabagana obwateekebwako kkooti, era omuwaabi tasasula ssente.",
-  "pathway.arbitration.why":
-    "Wagamba nti endagaano yo etwala obutakkaanya mu kusalawo. Endagaano y’okusalawo ekola bw’eba ewandiikiddwa, nga ne mu bubaka obukuumira ebyafaayo.",
   "pathway.arbitration.verbal":
     "Endagaano yo yakolebwa mu bigambo, kale kebera obanga ekitundu ekikwata ku kuteesa kyawandiikibwa.",
-  "pathway.arbitration.steps":
-    "Funa ekiragiro era okigoberere. Singa abantu tebasobola kukkiriziganya ku musango ogw’okusalawo, CADR kati ekitongole mu Minisitule y’Obwenkanya, yeekolera ku by’okulonda.",
   "pathway.small_claims.within":
     "Okwemulugunya kwo okwa {n} kuli mu kkomo lya UGX 10,000,000 ku nsonga entono ez'okukkiriza, era okwemulugunya ku kutunda ebintu kwetoloddwa. Omuwendo si gwe gwokka ogwetaagisa.",
   "pathway.small_claims.over":
@@ -280,8 +251,6 @@ export const lug: Partial<Messages> = {
     "Omutemwa gw'ensimbi entono guli mu siringi za Uganda era wasasula mu {n}, n'olwekyo omuwendo gwetaaga okukyusibwa n'okukeberwa.",
   "pathway.small_claims.delivery":
     "Wabuuza okuweebwa ekyo ky'oyagala. Okusaba okutono tekukwata ku kusaba kw'okukuleetera ekintu nga tewali kya ssente kirala.",
-  "pathway.small_claims.conditions":
-    "Embeera endala zikola: omuntu yekka (si kkampuni) asobola okuleeta okusaba, era ebika by'enkaayana ebimu tebiri mu mateeka.",
   "pathway.small_claims.steps":
     "Ng'otannasaba, wa omuguzi obubaka obuwandiike obulaga okusaba n'ennaku 14 ez'okusasula. Teekako endagaano yo, ebipapula by'obukakafu n'ebirala ku kusaba kwo.",
   "pathway.small_claims.advocates":
