@@ -4,6 +4,7 @@ import { Archive, ChevronRight, Loader2, Store } from "lucide-react";
 import Link from "next/link";
 
 import { CaseList, NewCaseButton, useCases } from "@/components/app/case-list";
+import { DemoButton } from "@/components/app/demo-button";
 import { RequireProfile } from "@/components/app/session";
 import { useT } from "@/lib/i18n/use-t";
 
@@ -45,7 +46,13 @@ export default function DashboardPage() {
               <section className="bg-grain rounded-3xl p-6 text-white shadow-lg">
                 <h2 className="font-display text-2xl font-semibold">{t("dashboard.newTitle")}</h2>
                 <p className="mt-2 max-w-lg text-brand-100/90">{t("dashboard.newBody")}</p>
-                <NewCaseButton className="mt-5" />
+                <div className="mt-5 flex flex-wrap items-start gap-3">
+                  <NewCaseButton />
+                  <DemoButton
+                    label="demo.load"
+                    className="inline-flex items-center gap-2 rounded-xl border border-white/25 px-4 py-3 font-semibold text-white transition hover:bg-white/10 disabled:opacity-60"
+                  />
+                </div>
               </section>
               <Cases />
             </div>
