@@ -1,40 +1,42 @@
 import { expect, test } from "@playwright/test";
 
-test("landing page explains the product", async ({ page }) => {
+import { en } from "../src/lib/i18n/en";
+
+import { register } from "./helpers";
+
+test("landing page explains the product and starts registration", async ({ page }) => {
   await page.goto("/");
-  await expect(page.getByRole("heading", { level: 1 })).toContainText("Understand the law");
-  await expect(page.getByRole("link", { name: /Try the Kikuubo trader demo/ })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText(en["landing.title"]);
+  await page.getByRole("link", { name: en["landing.start"] }).click();
+  await expect(page).toHaveURL(/\/register$/);
 });
 
-test("demo trader asks a scenario question and gets a sourced answer", async ({ page }) => {
-  await page.goto("/ask?demo=1");
-  await page.getByRole("button", { name: /My trading licence is expiring/ }).click();
-
-  const card = page.getByTestId("answer-card");
-  await expect(card).toBeVisible({ timeout: 20_000 });
-  await expect(card.getByRole("heading", { name: "Sources" })).toBeVisible();
-
-  await card.getByRole("tab", { name: /Original law/ }).click();
-  await expect(card.locator("blockquote").first()).toBeVisible();
+test("pages that need a profile send a new visitor to registration", async ({ page }) => {
+  await page.goto("/dashboard");
+  await expect(page).toHaveURL(/\/register$/);
 });
 
-test("out-of-scope questions are refused, not guessed", async ({ page }) => {
-  await page.goto("/ask?demo=1");
-  await page.getByLabel("Your question").fill("How do I file for divorce?");
-  await page.getByRole("button", { name: "Ask" }).click();
-  await expect(page.getByText("Not covered by our sources")).toBeVisible({ timeout: 20_000 });
+test("registration opens the dashboard with the main navigation", async ({ page }) => {
+  await register(page);
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Welcome, Nakato");
+  const nav = page.getByRole("navigation", { name: en["nav.menu"] }).first();
+  for (const key of [
+    "nav.dashboard",
+    "nav.cases",
+    "nav.vault",
+    "nav.support",
+    "nav.profile",
+  ] as const) {
+    await expect(nav.getByRole("link", { name: en[key] })).toBeAttached();
+  }
 });
 
-test("onboarding saves the profile and opens the ask page", async ({ page }) => {
-  await page.goto("/onboard");
-  await page.getByLabel("Where is it located?").fill("Owino Market, Kampala");
-  await page.getByRole("button", { name: /Save and ask a question/ }).click();
-  await expect(page).toHaveURL(/\/ask$/);
-  await expect(page.getByText("Owino Market, Kampala")).toBeVisible();
-});
-
-test("sources page lists every document with its currency", async ({ page }) => {
-  await page.goto("/sources");
-  await expect(page.getByRole("heading", { name: "Trade (Licensing) Act" })).toBeVisible();
-  await expect(page.getByText("Older text, may be outdated").first()).toBeVisible();
+test("choosing Luganda at registration switches the page language", async ({ page }) => {
+  await register(page, { language: "Oluganda" });
+  await expect(page.locator("html")).toHaveAttribute("lang", "lg");
+  await page.reload();
+  await expect(page.getByRole("button", { name: "Oluganda" })).toHaveAttribute(
+    "aria-pressed",
+    "true",
+  );
 });

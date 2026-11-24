@@ -14,7 +14,7 @@ export function SiteFooter() {
           {t("footer.body")}
         </p>
         <p className="flex shrink-0 gap-4">
-          <Link href="/sources" className="hover:text-brand-700">
+          <Link href="/legal-support" className="hover:text-brand-700">
             {t("footer.sources")}
           </Link>
           <span>#Hack4Justice2026</span>

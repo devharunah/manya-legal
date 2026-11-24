@@ -2,9 +2,14 @@ import { encodeWav } from "@/lib/audio/wav";
 
 import type { VoiceProvider } from "./types";
 
-/** Luganda for "My trading licence is expiring. What should I do?" */
-export const MOCK_TRANSCRIPT = "Layisinsi yange ey'okusuubula eggwaako. Nkole ki?";
-export const MOCK_ENGLISH = "My trading licence is expiring. What should I do?";
+/**
+ * Test fixture only, never shown to traders: an approximate Luganda account of
+ * the PRD 13 demo scenario, and the English the fixture "translates" it to.
+ */
+export const MOCK_TRANSCRIPT =
+  "Nasasula omusuubuzi ensimbi obukadde bubiri nga 10 November 2026, naye ebyamaguzi tebinnaleetebwa.";
+export const MOCK_ENGLISH =
+  "I paid the supplier 2 million shillings on 10 November 2026 for merchandise, but the goods have not been delivered.";
 
 /**
  * Stands in for the speech service in e2e tests (E2E_MOCK_VOICE), so the suite
