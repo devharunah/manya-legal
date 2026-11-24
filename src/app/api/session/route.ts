@@ -7,7 +7,8 @@ export async function POST() {
     const store = await startSession();
     return json({ profile: await store.getProfile() });
   } catch (error) {
-    if (error instanceof NoStoreError) return fail("MANYA storage is not available right now.", 503);
+    if (error instanceof NoStoreError)
+      return fail("MANYA storage is not available right now.", 503);
     console.error("[session]", error instanceof Error ? error.message : error);
     return fail("We couldn't start your session. Please reload the page.", 500);
   }

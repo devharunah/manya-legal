@@ -13,8 +13,8 @@ import { resolve } from "node:path";
 
 import { requireEnv } from "../src/lib/env";
 import { type MessageKey, en } from "../src/lib/i18n/en";
-import { createSunbird } from "../src/lib/voice/sunbird";
 import { keepsNumbers } from "../src/lib/text/numbers";
+import { createSunbird } from "../src/lib/voice/sunbird";
 
 const CONCURRENCY = 6;
 

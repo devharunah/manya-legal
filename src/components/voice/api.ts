@@ -1,6 +1,5 @@
 /** Browser-side calls to /api/voice/*. The speech service key never leaves the server. */
 
-
 async function readJson<T>(res: Response): Promise<T> {
   const data = res.headers.get("content-type")?.includes("application/json")
     ? ((await res.json()) as T | { error: string })

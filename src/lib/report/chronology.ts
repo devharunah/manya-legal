@@ -14,14 +14,23 @@ export interface ChronologyEvent {
  * Events in date order (PRD 4.8, 5.9). Built only from dates the trader gave
  * or a document showed; undated events come last, never assigned a date.
  */
-export function chronology(t: Translator, intake: Intake, documents: EvidenceDocument[]): ChronologyEvent[] {
+export function chronology(
+  t: Translator,
+  intake: Intake,
+  documents: EvidenceDocument[],
+): ChronologyEvent[] {
   const events: ChronologyEvent[] = [];
   const paid = intake.values["transaction.date"];
   if (paid) {
-    events.push({ date: String(paid.value), text: "Payment made to the supplier", source: "complainant" });
+    events.push({
+      date: String(paid.value),
+      text: "Payment made to the supplier",
+      source: "complainant",
+    });
   }
   const due = intake.values["delivery.expected_date"];
-  if (due) events.push({ date: String(due.value), text: "Agreed delivery date", source: "complainant" });
+  if (due)
+    events.push({ date: String(due.value), text: "Agreed delivery date", source: "complainant" });
   for (const doc of documents) {
     const label = lookup(t, `category.${doc.category}`, doc.category);
     const what = doc.extraction?.documentType || label;

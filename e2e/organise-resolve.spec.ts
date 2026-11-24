@@ -34,13 +34,11 @@ test("PRD 13 tests 2 and 3: organise evidence, see options, and prepare a consen
 
   // ── Organise ──
   await page.getByRole("tab", { name: en["case.tabOrganise"] }).click();
-  await page
-    .locator('input[type="file"]')
-    .setInputFiles({
-      name: "momo-receipt-1500000-2026-11-10.png",
-      mimeType: "image/png",
-      buffer: PNG,
-    });
+  await page.locator('input[type="file"]').setInputFiles({
+    name: "momo-receipt-1500000-2026-11-10.png",
+    mimeType: "image/png",
+    buffer: PNG,
+  });
   const card = page.getByTestId("evidence-card");
   await expect(card).toContainText("momo-receipt-1500000-2026-11-10.png");
   await expect(card).toContainText(en["evidence.notVerified"]);
@@ -53,14 +51,14 @@ test("PRD 13 tests 2 and 3: organise evidence, see options, and prepare a consen
   await expect(page.getByText(en["evidence.timeline"])).toBeVisible();
 
   // A disguised file is refused.
-  await page
-    .locator('input[type="file"]')
-    .setInputFiles({
-      name: "receipt.png",
-      mimeType: "image/png",
-      buffer: Buffer.from("not an image"),
-    });
-  await expect(page.getByRole("alert").filter({ hasText: "Upload a PDF, JPG or PNG." })).toBeVisible();
+  await page.locator('input[type="file"]').setInputFiles({
+    name: "receipt.png",
+    mimeType: "image/png",
+    buffer: Buffer.from("not an image"),
+  });
+  await expect(
+    page.getByRole("alert").filter({ hasText: "Upload a PDF, JPG or PNG." }),
+  ).toBeVisible();
 
   // ── Resolve ──
   await page.getByRole("tab", { name: en["case.tabResolve"] }).click();
@@ -81,7 +79,9 @@ test("PRD 13 tests 2 and 3: organise evidence, see options, and prepare a consen
     .click();
   await page.getByLabel("momo-receipt-1500000-2026-11-10.png").check();
   await page.getByRole("button", { name: en["referral.create"] }).click();
-  await expect(page.getByRole("alert").filter({ hasText: en["referral.needConsent"] })).toBeVisible();
+  await expect(
+    page.getByRole("alert").filter({ hasText: en["referral.needConsent"] }),
+  ).toBeVisible();
   await page.getByLabel(/I give my consent/).check();
   await page.getByRole("button", { name: en["referral.create"] }).click();
   await expect(page.getByText(en["referral.ready"])).toBeVisible();

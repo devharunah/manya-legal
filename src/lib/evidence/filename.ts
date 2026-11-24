@@ -42,4 +42,3 @@ export function readFromFilename(filename: string): DocumentReading {
     ok: true,
   };
 }
-
