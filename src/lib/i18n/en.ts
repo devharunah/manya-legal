@@ -39,6 +39,12 @@ export const en = {
     "See your options, from talking to the supplier to mediation or small claims, with the law behind each.",
   "landing.loading": "Opening MANYA…",
 
+  "demo.open": "Open the demo case",
+  "demo.load": "Load demo cases",
+  "demo.loading": "Loading the demo…",
+  "demo.note": "Demo cases use a fictional trader and documents marked SAMPLE.",
+  "demo.error": "We couldn't load the demo cases. Please try again.",
+
   "register.title": "Welcome to MANYA",
   "register.body":
     "A few details so your dispute report is complete. We collect only what a report needs.",

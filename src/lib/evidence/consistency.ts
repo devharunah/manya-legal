@@ -63,7 +63,9 @@ export function checkConsistency(intake: Intake, documents: EvidenceDocument[]):
         documentValue: e.currency,
       });
     }
-    if (typeof date === "string" && e.date && e.date !== date) {
+    // An invoice or order is usually dated before payment; only receipts carry the payment date.
+    const isPayment = doc.category === "payment_evidence";
+    if (isPayment && typeof date === "string" && e.date && e.date !== date) {
       flags.push({
         documentId: doc.id,
         kind: "date",
@@ -71,7 +73,12 @@ export function checkConsistency(intake: Intake, documents: EvidenceDocument[]):
         documentValue: formatDate(e.date),
       });
     }
-    if (typeof respondent === "string" && e.recipient && !namesOverlap(respondent, e.recipient)) {
+    if (
+      isPayment &&
+      typeof respondent === "string" &&
+      e.recipient &&
+      !namesOverlap(respondent, e.recipient)
+    ) {
       flags.push({
         documentId: doc.id,
         kind: "respondent",

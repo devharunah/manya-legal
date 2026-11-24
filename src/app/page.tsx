@@ -3,6 +3,7 @@
 import { ArrowRight, FolderOpen, Handshake, MapPin, MessageSquareText } from "lucide-react";
 import Link from "next/link";
 
+import { DemoButton } from "@/components/app/demo-button";
 import { useSession } from "@/components/app/session";
 import { useT } from "@/lib/i18n/use-t";
 
@@ -37,6 +38,11 @@ export default function Home() {
             >
               {t("landing.start")} <ArrowRight className="size-4" aria-hidden />
             </Link>
+            <DemoButton
+              label="demo.open"
+              className="mt-3 inline-flex items-center justify-center gap-2 rounded-xl border border-white/25 px-6 py-3 font-semibold text-white transition hover:bg-white/10 disabled:opacity-60"
+            />
+            <p className="mt-2 text-xs text-brand-100/70">{t("demo.note")}</p>
           </div>
         </div>
       </section>
