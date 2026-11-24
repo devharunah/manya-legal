@@ -41,13 +41,25 @@ describe("the Luganda dictionary", () => {
 });
 
 describe("intake strings", () => {
-  it("has a question and a label for every field, and a label for every choice", () => {
+  it("has a label for every field and every choice, and text for every stage question", () => {
     for (const f of FIELDS) {
-      expect(`q.${f.key}` in en).toBe(true);
       expect(`field.${f.key}` in en).toBe(true);
       for (const c of "choices" in f ? f.choices : []) {
         expect(`choice.${f.key}.${c}` in en).toBe(true);
       }
+    }
+    for (const q of [
+      "ask.agreement",
+      "ask.agreementClauses",
+      "ask.parties",
+      "ask.partiesBoth",
+      "ask.transaction",
+      "ask.events",
+      "ask.outcome",
+      "ask.evidence",
+      "ask.clarify",
+    ]) {
+      expect(q in en).toBe(true);
     }
   });
 });

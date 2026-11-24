@@ -4,19 +4,29 @@ import { join } from "node:path";
 import type { CaseRecord, CaseStore, EvidenceDocument } from "@/lib/cases/types";
 import { sha256Hex } from "@/lib/evidence/upload";
 import { type FieldKey, type Intake, emptyIntake } from "@/lib/intake/fields";
+import { encodeFields } from "@/lib/intake/progress";
 import { loadFonts } from "@/lib/report/fonts";
 import { buildReportPdf } from "@/lib/report/report";
 
 import { DEMO_CASES, DEMO_PROFILE, type DemoCase } from "./cases";
 
-const DIR = join(process.cwd(), "src", "assets", "demo");
+const DIR = join(process.cwd(), "public", "demo");
 
 function intakeOf(demo: DemoCase, confirmed: boolean): Intake {
   const values: Intake["values"] = {};
   for (const [key, value] of Object.entries(demo.values) as [FieldKey, string | number][]) {
     values[key] = { value, source: "complainant", confirmed };
   }
-  return { ...emptyIntake(), values, narrative: demo.narrative };
+  const asked: NonNullable<Intake["workflow"]>["asked"] = {};
+  for (const turn of demo.turns)
+    if ("ask" in turn) asked[turn.stage] = (asked[turn.stage] ?? 0) + 1;
+  return {
+    ...emptyIntake(),
+    values,
+    narrative: demo.narrative,
+    events: demo.events,
+    workflow: { asked, rounds: demo.turns.filter((t) => "trader" in t).length },
+  };
 }
 
 async function seedCase(store: CaseStore, demo: DemoCase): Promise<CaseRecord> {
@@ -40,11 +50,11 @@ async function seedCase(store: CaseStore, demo: DemoCase): Promise<CaseRecord> {
           ? {
               caseId: id,
               sender: "manya",
-              originalText: `q.${turn.ask}`,
+              originalText: turn.ask,
               processedText: null,
               language: "en",
               inputType: "system",
-              field: turn.ask,
+              field: encodeFields(turn.fields),
             }
           : {
               caseId: id,

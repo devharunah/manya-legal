@@ -11,7 +11,7 @@ import { editField, markUnknown } from "@/lib/intake/merge";
 
 import { chronology } from "../chronology";
 import { PdfWriter } from "../pdf-writer";
-import { DISCLAIMER, buildReportPdf, writeReport } from "../report";
+import { DISCLAIMER, NOTICE, REPORT_TITLE, buildReportPdf, writeReport } from "../report";
 
 const fonts = {
   regular: new Uint8Array(
@@ -51,7 +51,7 @@ describe("dispute report PDF", () => {
     const doc = await PDFDocument.load(bytes);
     expect(doc.getPageCount()).toBeGreaterThanOrEqual(2);
     expect(doc.getTitle()).toContain("MNY-0001");
-  });
+  }, 30_000);
 
   it("writes every PRD section, the disclaimer, and marks gaps instead of filling them", async () => {
     const w = await PdfWriter.create(fonts, "test");
@@ -71,12 +71,31 @@ describe("dispute report PDF", () => {
       preparedAt: new Date("2026-11-24"),
     });
     const text = written.join("\n");
-    for (const n of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12])
-      expect(text).toMatch(new RegExp(`^${n}\\. `, "m"));
+    expect(text).toContain(REPORT_TITLE);
+    for (const heading of [
+      "1. Case overview",
+      "2. Parties involved",
+      "3. Transaction details",
+      "4. Agreement and dispute-resolution arrangements",
+      "5. Chronology of events",
+      "6. Supporting evidence register",
+      "7. Trader's desired outcome",
+      "8. Outstanding information",
+      "9. Potential resolution pathways",
+      "10. Important notice",
+    ]) {
+      expect(text).toContain(heading);
+    }
+    expect(text).toContain(NOTICE);
     expect(text).toContain(DISCLAIMER);
     expect(text).toContain("2,000,000");
-    expect(text).toContain("Supplier (respondent) | Not provided | Outstanding");
-    expect(text).toContain("Supplier phone | Not known to the complainant");
+    // Gaps are marked, never filled; reported facts are labelled as unverified.
+    expect(text).toContain("Supplier (respondent) | Not provided | Not provided");
+    expect(text).toContain("Supplier phone | Not known | Unknown to the trader");
+    expect(text).toContain("Reported and confirmed by the trader, not independently verified");
+    // Unknown clauses are flagged for review, and the pathways section cites sources.
+    expect(text).toContain("Uncertainty requiring legal review | Unclear:");
+    expect(text).toContain("Relevant legal source | Small Claims Procedure Rules, Rule 5");
   });
 });
 

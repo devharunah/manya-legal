@@ -1,3 +1,5 @@
+import type { PathwayType } from "@/lib/resolve/pathways";
+
 /**
  * Legal-support directory (PRD 6.4). Institutions only: each entry was
  * checked against its own official source on `lastVerified`. "verified" is
@@ -20,7 +22,7 @@ export interface Provider {
   verificationSource: string;
   lastVerified: string;
   /** Pathways this provider can help with. */
-  pathways: ("negotiation" | "mediation" | "arbitration" | "small_claims" | "legal_referral")[];
+  pathways: PathwayType[];
 }
 
 export const PROVIDERS: Provider[] = [
@@ -73,7 +75,13 @@ export const PROVIDERS: Provider[] = [
     verificationSource:
       "justicecentres.go.ug (read through a summarising tool; wording to be re-checked)",
     lastVerified: "2026-11-24",
-    pathways: ["mediation", "legal_referral", "small_claims"],
+    pathways: [
+      "mediation",
+      "agreed_mediation",
+      "legal_referral",
+      "clarify_agreement",
+      "small_claims",
+    ],
   },
   {
     id: "uls-lap",
@@ -87,7 +95,7 @@ export const PROVIDERS: Provider[] = [
     status: "verification_pending",
     verificationSource: "uls.or.ug (read through a summarising tool; wording to be re-checked)",
     lastVerified: "2026-11-24",
-    pathways: ["mediation", "legal_referral"],
+    pathways: ["mediation", "agreed_mediation", "legal_referral", "clarify_agreement"],
   },
 ];
 

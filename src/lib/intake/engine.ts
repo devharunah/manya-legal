@@ -3,19 +3,37 @@ import type { CaseRecord, CaseStore, Message, NewMessage } from "@/lib/cases/typ
 import { allNumbers, numbersIn } from "@/lib/text/numbers";
 
 import type { ExtractResult } from "./extract";
-import type { FieldKey } from "./fields";
-import { markUnknown, mergeExtraction } from "./merge";
-import { missingRequired, nextField } from "./progress";
+import { type FieldKey, type Intake, type Stage, fieldSpec } from "./fields";
+import { markUnknown, mergeEvents, mergeExtraction } from "./merge";
+import {
+  completion,
+  countRound,
+  decodeFields,
+  encodeFields,
+  markAsked,
+  nextStep,
+} from "./progress";
+
+/** What the model is told about the turn: the plan position, what is known and what is missing. */
+export interface ExtractContext {
+  stage: Stage | null;
+  /** The question MANYA asked, as English text, or null for the opening account. */
+  question: string | null;
+  asking: FieldKey[];
+  known: Partial<Record<FieldKey, string | number>>;
+}
 
 export interface EngineDeps {
-  extract: (english: string, asked: FieldKey | null) => Promise<ExtractResult>;
+  extract: (english: string, context: ExtractContext) => Promise<ExtractResult>;
   /** Luganda → English. Only called for Luganda cases. */
   toEnglish: (text: string) => Promise<string>;
+  /** English text of a question key, for the model's context. */
+  questionText?: (key: string) => string;
 }
 
 export type TraderInput =
   | { kind: "message"; text: string; inputType: "text" | "voice" }
-  | { kind: "skip"; field: FieldKey };
+  | { kind: "skip" };
 
 export class TranslationError extends Error {
   constructor() {
@@ -24,16 +42,26 @@ export class TranslationError extends Error {
   }
 }
 
-/** The field MANYA last asked about, if the trader is answering a question. */
-export function askedField(messages: Message[]): FieldKey | null {
-  const last = [...messages].reverse().find((m) => m.sender === "manya");
-  return last?.field ?? null;
+/** MANYA's last question in the conversation, if the trader is answering one. */
+export function lastQuestion(messages: Message[]): Message | null {
+  return [...messages].reverse().find((m) => m.sender === "manya" && m.field) ?? null;
 }
 
+/** The fields MANYA last asked about. */
+export function askedFields(messages: Message[]): FieldKey[] {
+  return decodeFields(lastQuestion(messages)?.field ?? null);
+}
+
+const knownValues = (intake: Intake) =>
+  Object.fromEntries(
+    Object.entries(intake.values).map(([k, v]) => [k, v.value]),
+  ) as ExtractContext["known"];
+
 /**
- * One turn of the guided intake (PRD 4.3). The model reads the message; this
- * code decides what is kept, which question comes next, and when the case
- * moves to confirmation.
+ * One turn of the six-stage guided intake. The model reads the message; this
+ * code decides what is kept, which stage comes next, what is asked, and when
+ * the case moves to review. MANYA's lines are stored as keys (and the fields
+ * they cover), so they show in whichever language the trader picks.
  */
 export async function intakeTurn(
   store: CaseStore,
@@ -42,7 +70,8 @@ export async function intakeTurn(
   deps: EngineDeps,
 ): Promise<{ case: CaseRecord; added: Message[] }> {
   const history = await store.listMessages(record.id);
-  const asked = askedField(history);
+  const question = lastQuestion(history);
+  const asking = askedFields(history);
   const added: Message[] = [];
   const say = async (m: Omit<NewMessage, "caseId" | "language">) => {
     added.push(await store.addMessage({ ...m, caseId: record.id, language: record.language }));
@@ -53,13 +82,14 @@ export async function intakeTurn(
   let retry = false;
 
   if (input.kind === "skip") {
-    intake = markUnknown(intake, input.field);
+    // "I don't know" covers every detail the last question asked for that is still missing.
+    for (const key of asking) if (!intake.values[key]) intake = markUnknown(intake, key);
     await say({
       sender: "trader",
       originalText: "intake.skipped",
       processedText: null,
       inputType: "system",
-      field: input.field,
+      field: encodeFields(asking),
     });
   } else {
     const original = input.text.trim();
@@ -81,14 +111,19 @@ export async function intakeTurn(
       field: null,
     });
 
-    const extracted = await deps.extract(english, asked);
+    const extracted = await deps.extract(english, {
+      stage: asking[0] ? fieldSpec(asking[0]).stage : null,
+      question: question ? (deps.questionText?.(question.originalText) ?? null) : null,
+      asking,
+      known: knownValues(intake),
+    });
     // Values must be grounded in the trader's own words, in either language.
-    const merged = mergeExtraction(intake, extracted.extraction, `${original}\n${english}`);
-    intake = merged.intake;
-    retry = asked !== null && merged.dropped.includes(asked);
+    const grounding = `${original}\n${english}`;
+    const merged = mergeExtraction(intake, extracted.extraction, grounding);
+    intake = mergeEvents(countRound(merged.intake), extracted.events ?? [], grounding);
+    retry = asking.length > 0 && asking.some((k) => merged.dropped.includes(k));
 
-    const firstMessage = !intake.narrative;
-    if (firstMessage) {
+    if (!intake.narrative) {
       intake = {
         ...intake,
         narrative: original,
@@ -110,33 +145,37 @@ export async function intakeTurn(
   let status = record.status === "draft" ? move("draft", "collecting_information") : record.status;
   if (status === "paused") status = move("paused", "collecting_information");
 
-  const next = nextField(intake);
-  if (retry) {
-    await say({
-      sender: "manya",
-      originalText: "intake.retry",
-      processedText: null,
-      inputType: "system",
-      field: null,
-    });
-  }
-  if (next && status === "collecting_information") {
-    await say({
-      sender: "manya",
-      originalText: `q.${next}`,
-      processedText: null,
-      inputType: "system",
-      field: next,
-    });
-  } else if (!next && missingRequired(intake).length === 0 && status === "collecting_information") {
-    status = move(status, "awaiting_user_confirmation");
-    await say({
-      sender: "manya",
-      originalText: "intake.done",
-      processedText: null,
-      inputType: "system",
-      field: null,
-    });
+  if (status === "collecting_information") {
+    if (retry) {
+      await say({
+        sender: "manya",
+        originalText: "intake.retry",
+        processedText: null,
+        inputType: "system",
+        field: null,
+      });
+    }
+    const step = nextStep(intake);
+    if (step) {
+      intake = markAsked(intake, step.stage);
+      await say({
+        sender: "manya",
+        originalText: step.question,
+        processedText: null,
+        inputType: "system",
+        field: encodeFields(step.fields),
+      });
+    } else if (intake.narrative) {
+      // Nothing left to ask: review, even with gaps. Missing details are listed, never guessed.
+      status = move(status, "awaiting_user_confirmation");
+      await say({
+        sender: "manya",
+        originalText: completion(intake) === 100 ? "intake.done" : "intake.doneMissing",
+        processedText: null,
+        inputType: "system",
+        field: null,
+      });
+    }
   }
 
   const updated = await store.updateCase(record.id, { intake, category, status });

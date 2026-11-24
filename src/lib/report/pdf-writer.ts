@@ -149,6 +149,53 @@ export class PdfWriter {
     this.gap(2);
   }
 
+  /**
+   * A simple table: column widths as fractions of the page, wrapped cells,
+   * a bold header row repeated when the table runs onto a new page.
+   */
+  table(headers: string[], rows: string[][], widths: number[]) {
+    const size = 8.5;
+    const leading = size * 1.35;
+    const pad = 4;
+    const cols = widths.map((w) => w * this.width);
+    const drawRow = (cells: string[], bold: boolean) => {
+      const font = bold ? this.bold : this.regular;
+      const wrapped = cells.map((c, i) => this.wrap(c, font, size, (cols[i] ?? 0) - pad * 2));
+      const height = Math.max(...wrapped.map((w) => w.length)) * leading + pad * 2;
+      if (this.y - height < MARGIN) {
+        this.newPage();
+        if (!bold) drawRow(headers, true);
+      }
+      let x = MARGIN;
+      wrapped.forEach((lines, i) => {
+        const w = cols[i] ?? 0;
+        this.page.drawRectangle({
+          x,
+          y: this.y - height,
+          width: w,
+          height,
+          borderColor: MUTED,
+          borderWidth: 0.4,
+          ...(bold ? { color: rgb(0.95, 0.93, 0.96) } : {}),
+        });
+        lines.forEach((line, j) => {
+          this.page.drawText(line, {
+            x: x + pad,
+            y: this.y - pad - (j + 1) * leading + 2,
+            size,
+            font,
+            color: INK,
+          });
+        });
+        x += w;
+      });
+      this.y -= height;
+    };
+    drawRow(headers, true);
+    for (const row of rows) drawRow(row, false);
+    this.gap(8);
+  }
+
   gap(points: number) {
     this.y -= points;
   }

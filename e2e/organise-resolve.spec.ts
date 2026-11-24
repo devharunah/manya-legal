@@ -15,11 +15,10 @@ async function reportReady(page: Page) {
   const id = await startCase(page);
   await say(
     page,
-    "I paid the supplier 2,000,000 shillings on 10 November 2026 but the goods were never delivered.",
+    "I paid Kato Wholesalers 2,000,000 shillings on 10 November 2026 for sugar but the goods were never delivered.",
   );
-  await expect(page.getByTestId("manya-message").last()).toHaveText(en["q.respondent.name"]);
-  await say(page, "Kato Wholesalers");
-  await expect(page.getByTestId("manya-message").last()).toHaveText(en["q.transaction.goods"]);
+  await expect(page.getByTestId("manya-message").last()).toHaveText(en["ask.agreement"]);
+  // The trader can jump to review at any point; gaps stay marked as missing.
   await page.getByRole("button", { name: en["intake.reviewNow"] }).click();
   await page.getByLabel(en["review.confirm"]).check();
   await page.getByRole("button", { name: en["review.generate"] }).click();

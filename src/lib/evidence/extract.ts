@@ -82,5 +82,8 @@ export async function readDocument(
       );
     }
   }
-  return { category: "unknown", confidence: null, extraction: null, ok: false };
+  // Every model failed: classify from the file name only, and say the contents were not read,
+  // so the trader is asked to enter the details rather than shown an empty card.
+  const byName = readFromFilename(filename);
+  return { category: byName.category, confidence: null, extraction: null, ok: false };
 }

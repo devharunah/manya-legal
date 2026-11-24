@@ -1,4 +1,11 @@
-import { FIELDS, type FieldKey, type Intake, type Provenance, fieldSpec } from "./fields";
+import {
+  FIELDS,
+  type FieldKey,
+  type Intake,
+  type Provenance,
+  type TimelineEvent,
+  fieldSpec,
+} from "./fields";
 import { amountGrounded, currencyGrounded, dateGrounded, phoneGrounded } from "./ground";
 
 /** What the model may return for one message: any subset of fields, nulls for "not said". */
@@ -28,6 +35,12 @@ export function acceptValue(
       return dateGrounded(String(raw), text) ? String(raw) : null;
     case "phone":
       return phoneGrounded(String(raw), text) ? String(raw).trim() : null;
+    case "email": {
+      const email = String(raw).trim().toLowerCase();
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) && text.toLowerCase().includes(email)
+        ? email
+        : null;
+    }
     case "currency": {
       const code = String(raw).trim().toUpperCase();
       return currencyGrounded(code, text) ? code : null;
@@ -116,4 +129,30 @@ export function confirmAll(intake: Intake): Intake {
     Object.entries(intake.values).map(([k, v]) => [k, { ...v, confirmed: true }]),
   ) as Intake["values"];
   return { ...intake, values };
+}
+
+/**
+ * Adds timeline events from one message. A date is kept only if the trader
+ * gave some date in that message; otherwise the event stays undated rather
+ * than being given a guessed date. Repeats are ignored.
+ */
+export function mergeEvents(
+  intake: Intake,
+  events: { date: string | null; text: string }[],
+  text: string,
+): Intake {
+  const existing = intake.events ?? [];
+  const seen = new Set(existing.map((e) => e.text.toLowerCase()));
+  const added: TimelineEvent[] = [];
+  for (const e of events) {
+    const description = e.text.trim().slice(0, 200);
+    if (!description || seen.has(description.toLowerCase())) continue;
+    seen.add(description.toLowerCase());
+    added.push({
+      date: e.date && dateGrounded(e.date, text) ? e.date : null,
+      text: description,
+      source: "trader",
+    });
+  }
+  return added.length ? { ...intake, events: [...existing, ...added] } : intake;
 }

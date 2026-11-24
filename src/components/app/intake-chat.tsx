@@ -4,7 +4,9 @@ import { ClipboardCheck, Info, Loader2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 import type { CaseRecord, Message } from "@/lib/cases/types";
-import { lookup, useT } from "@/lib/i18n/use-t";
+import { type MessageKey, en } from "@/lib/i18n/en";
+import { useT } from "@/lib/i18n/use-t";
+import { decodeFields, stepNumber } from "@/lib/intake/progress";
 import { useLanguage } from "@/lib/use-language";
 
 import { api } from "./client-api";
@@ -14,10 +16,16 @@ import type { WorkspaceUpdate } from "./workspace-types";
 function Bubble({ m }: { m: Message }) {
   const t = useT();
   const mine = m.sender === "trader";
-  // MANYA's lines are stored as keys, so they show in whichever language is chosen now.
+  // MANYA's lines are stored as keys (plus the fields they ask about), so they
+  // show in whichever language is chosen now, listing only what is missing.
+  const labels = decodeFields(m.field)
+    .map((k) => t(`field.${k}`).toLowerCase())
+    .join(", ");
   const text =
     m.sender === "manya" || m.inputType === "system"
-      ? lookup(t, m.originalText, m.originalText)
+      ? m.originalText in en
+        ? t(m.originalText as MessageKey, { n: labels })
+        : m.originalText
       : m.originalText;
   return (
     <li className={`flex ${mine ? "justify-end" : "justify-start"}`}>
@@ -57,7 +65,7 @@ export function IntakeChat({
   const endRef = useRef<HTMLLIElement>(null);
 
   const lastManya = [...messages].reverse().find((m) => m.sender === "manya");
-  const asking = lastManya?.field ?? null;
+  const asking = lastManya?.field ? decodeFields(lastManya.field) : [];
   const open =
     record.status === "draft" ||
     record.status === "collecting_information" ||
@@ -112,6 +120,21 @@ export function IntakeChat({
       aria-label={t("case.tabReport")}
       className="rounded-3xl border border-line bg-paper p-3 sm:p-5"
     >
+      {open && (
+        <div className="mb-3 flex items-center gap-3 px-1" data-testid="intake-step">
+          <span className="text-xs font-semibold text-brand-800">
+            {t("intake.step", { n: stepNumber(record.intake) })}
+          </span>
+          <span className="flex flex-1 gap-1" aria-hidden>
+            {[1, 2, 3, 4, 5, 6].map((n) => (
+              <span
+                key={n}
+                className={`h-1.5 flex-1 rounded-full ${n <= stepNumber(record.intake) ? "bg-brand-600" : "bg-line"}`}
+              />
+            ))}
+          </span>
+        </div>
+      )}
       <ol className="max-h-[55vh] space-y-3 overflow-y-auto p-1" aria-live="polite">
         <li className="flex justify-start">
           <div className="max-w-[85%] rounded-2xl rounded-bl-sm border border-line bg-white px-4 py-2.5 text-[15px] leading-6 shadow-sm">
@@ -137,11 +160,11 @@ export function IntakeChat({
             onSend={(text, inputType) => post({ text, inputType })}
           />
           <div className="mt-2 flex flex-wrap items-center gap-2">
-            {asking && (
+            {asking.length > 0 && (
               <button
                 type="button"
                 disabled={busy}
-                onClick={() => void post({ skip: asking })}
+                onClick={() => void post({ skip: true })}
                 className="rounded-lg border border-line bg-white px-3 py-1.5 text-sm font-medium text-muted hover:text-brand-800"
               >
                 {t("intake.skip")}

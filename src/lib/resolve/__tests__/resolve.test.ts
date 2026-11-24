@@ -54,7 +54,7 @@ describe("pathways (PRD 6.2/6.3)", () => {
     for (const p of all) {
       for (const id of p.chunkIds) expect(knownChunk(id)).toBe(true);
       for (const id of p.providerIds) expect(PROVIDERS.some((x) => x.id === id)).toBe(true);
-      for (const line of [...p.why, ...p.steps]) expect(line.key in en).toBe(true);
+      for (const line of [...p.why, ...p.check, ...p.steps]) expect(line.key in en).toBe(true);
     }
   });
 
@@ -77,7 +77,7 @@ describe("pathways (PRD 6.2/6.3)", () => {
     );
     expect(at?.status).toBe("requires_further_assessment");
     expect(at?.why[0]).toEqual({ key: "pathway.small_claims.within", n: "UGX 10,000,000" });
-    expect(at?.why.map((l) => l.key)).toContain("pathway.small_claims.conditions");
+    expect(at?.check.map((l) => l.key)).toContain("pathway.small_claims.conditions");
 
     const over = smallClaims(
       base({ "transaction.amount": "10000001", "transaction.currency": "UGX" }),

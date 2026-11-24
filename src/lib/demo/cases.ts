@@ -1,18 +1,19 @@
 import type { DocumentCategory, DocumentExtraction, Profile } from "@/lib/cases/types";
-import type { FieldKey } from "@/lib/intake/fields";
+import type { FieldKey, Stage, TimelineEvent } from "@/lib/intake/fields";
+import type { QuestionKey } from "@/lib/intake/progress";
 
 /**
- * Stage demo data: a fictional Kikuubo trader and two cases, so a pitch can
- * show the whole journey without answering every question live. Every
- * evidence file is watermarked "SAMPLE – for demonstration only", and every
- * person and business here is invented.
+ * Stage demo data. EVERY name, phone number, email, business, transaction
+ * and document here is fictional test data, and every evidence file is
+ * watermarked SAMPLE. Files live in public/demo, so a presenter can also
+ * download them and upload them live.
  */
 
 export const DEMO_PROFILE: Profile = {
-  fullName: "Nakato Sarah",
-  phone: "0772 123456",
+  fullName: "Sarah Namusoke",
+  phone: "+256 700 000 101",
   preferredLanguage: "en",
-  businessName: "Nakato General Store",
+  businessName: "Sarah's Home Essentials",
   businessType: "general_retail",
   location: "Kikuubo, Kampala",
 };
@@ -24,13 +25,19 @@ export interface DemoDocument {
   extraction: DocumentExtraction;
 }
 
+export type DemoTurn =
+  | { trader: string }
+  | { ask: QuestionKey; stage: Stage; fields: FieldKey[] }
+  | { say: string };
+
 export interface DemoCase {
   /** Recognises an already-loaded demo case, so loading twice adds nothing. */
   key: string;
   narrative: string;
   values: Partial<Record<FieldKey, string | number>>;
-  /** The conversation as it happened: the trader's words, and the field MANYA asked about. */
-  turns: ({ trader: string } | { ask: FieldKey } | { say: string })[];
+  events: TimelineEvent[];
+  /** The conversation as it happened, in the six-stage flow. */
+  turns: DemoTurn[];
   documents: DemoDocument[];
   /** "report": confirmed with a PDF, ready for Resolve. "review": waiting for the trader to confirm. */
   stage: "report" | "review";
@@ -48,144 +55,239 @@ const doc = (extraction: Partial<DocumentExtraction>): DocumentExtraction => ({
   ...extraction,
 });
 
-export const DEMO_CASES: DemoCase[] = [
-  {
-    key: "Kato Wholesalers Ltd",
-    stage: "report",
-    narrative:
-      "I paid Kato Wholesalers 2,000,000 shillings by Mobile Money on 3 November 2026 for 40 bags of sugar. They promised to deliver by 10 November, but nothing has come and now they don't reply.",
-    values: {
-      "complainant.name": "Nakato Sarah",
-      "complainant.business_name": "Nakato General Store",
-      "complainant.phone": "0772 123456",
-      "respondent.name": "Kato Wholesalers Ltd",
-      "respondent.phone": "0701 987654",
-      "transaction.date": "2026-11-03",
-      "transaction.amount": 2_000_000,
-      "transaction.currency": "UGX",
-      "transaction.goods": "40 bags of sugar, 50 kg each",
-      "transaction.agreement_type": "whatsapp",
-      "delivery.expected_date": "2026-11-10",
-      "delivery.status": "not_delivered",
-      previous_communication:
-        "Messaged and called the supplier on 11 and 18 November. He promised delivery 'next week', then stopped replying.",
-      requested_resolution: "refund",
-      arbitration_agreement: "no",
-    },
-    turns: [
-      {
-        trader:
-          "I paid Kato Wholesalers 2,000,000 shillings by Mobile Money on 3 November 2026 for 40 bags of sugar. They promised to deliver by 10 November, but nothing has come and now they don't reply.",
-      },
-      { say: "intake.understood" },
-      { ask: "transaction.agreement_type" },
-      { trader: "We agreed on WhatsApp. He also sent me an invoice." },
-      { ask: "requested_resolution" },
-      { trader: "I want my money back." },
-      { ask: "respondent.phone" },
-      { trader: "0701 987654" },
-      { ask: "previous_communication" },
-      {
-        trader:
-          "I messaged and called him on 11 and 18 November. He said next week, then stopped replying.",
-      },
-      { ask: "arbitration_agreement" },
-      { trader: "No, nothing like that." },
-      { say: "intake.done" },
-    ],
-    documents: [
-      {
-        file: "momo-receipt-kato.png",
-        mimeType: "image/png",
-        category: "payment_evidence",
-        extraction: doc({
-          documentType: "Mobile Money payment receipt",
-          date: "2026-11-03",
-          amount: 2_000_000,
-          currency: "UGX",
-          reference: "58213907461",
-          sender: "Nakato Sarah",
-          recipient: "Kato Wholesalers Ltd",
-          description: "Payment of UGX 2,000,000 for a sugar order.",
-        }),
-      },
-      {
-        file: "invoice-kato-INV-0412.pdf",
-        mimeType: "application/pdf",
-        category: "transaction_evidence",
-        extraction: doc({
-          documentType: "Proforma invoice INV-0412",
-          date: "2026-11-02",
-          amount: 2_000_000,
-          currency: "UGX",
-          reference: "INV-0412",
-          sender: "Kato Wholesalers Ltd",
-          recipient: "Nakato Sarah",
-          description: "40 bags of sugar at UGX 50,000, delivery by 10 November 2026.",
-        }),
-      },
-      {
-        file: "chat-kato-wholesalers.png",
-        mimeType: "image/png",
-        category: "communication_evidence",
-        extraction: doc({
-          documentType: "Chat with the supplier",
-          date: "2026-11-02",
-          sender: "Kato Wholesalers (Kato John)",
-          description:
-            "Agreement on 40 bags for 2,000,000 with delivery by the 10th; the supplier confirms payment, then delays.",
-        }),
-      },
-    ],
+const NARRATIVE =
+  "I paid Daniel Okello of Okello Wholesale Supplies UGX 2,000,000 by mobile money on 10 November 2026 for household merchandise. He promised delivery by 12 November 2026 but no goods have been delivered.";
+
+/** Fictional demo case: Supplier Non-Delivery After Payment. */
+export const PRIMARY_DEMO: DemoCase = {
+  key: "Daniel Okello",
+  stage: "report",
+  narrative: NARRATIVE,
+  values: {
+    dispute_status: "ongoing",
+    "transaction.agreement_type": "whatsapp",
+    agreement_record: "yes",
+    arbitration_agreement: "no",
+    mediation_clause: "no",
+    separate_arbitration_agreement: "no",
+    "complainant.name": "Sarah Namusoke",
+    "complainant.business_name": "Sarah's Home Essentials",
+    "complainant.phone": "+256 700 000 101",
+    "complainant.email": "sarah.sample@example.com",
+    "complainant.location": "Kikuubo, Kampala",
+    "respondent.name": "Daniel Okello",
+    "respondent.business_name": "Okello Wholesale Supplies",
+    "respondent.phone": "+256 700 000 202",
+    "transaction.date": "2026-11-10",
+    "transaction.amount": 2_000_000,
+    "transaction.currency": "UGX",
+    "transaction.payment_method": "mobile_money",
+    "transaction.goods": "Household merchandise",
+    "delivery.expected_date": "2026-11-12",
+    "delivery.status": "not_delivered",
+    previous_communication:
+      "Messaged the supplier on 14 November 2026 (he said transport was delayed) and again on 18 November 2026 (he said he would update me). No goods delivered.",
+    requested_resolution: "delivery_or_refund",
+    evidence_available:
+      "Mobile money confirmation, invoice, WhatsApp conversation and a written statement.",
   },
-  {
-    key: "Ssemanda Brian",
-    stage: "review",
-    narrative:
-      "I paid Ssemanda Brian 2,000,000 shillings on 12 November 2026 for 60 cartons of bar soap. He was to deliver within a week but has only made excuses.",
-    values: {
-      "complainant.name": "Nakato Sarah",
-      "complainant.business_name": "Nakato General Store",
-      "complainant.phone": "0772 123456",
-      "respondent.name": "Ssemanda Brian",
-      "respondent.phone": "0757 246810",
-      "transaction.date": "2026-11-12",
-      "transaction.amount": 2_000_000,
-      "transaction.currency": "UGX",
-      "transaction.goods": "60 cartons of bar soap",
-      "transaction.agreement_type": "verbal",
-      "delivery.status": "not_delivered",
-      requested_resolution: "delivery",
+  events: [
+    {
+      date: "2026-11-10",
+      text: "Trader agrees to buy household merchandise from the supplier",
+      source: "trader",
     },
-    turns: [
-      {
-        trader:
-          "I paid Ssemanda Brian 2,000,000 shillings on 12 November 2026 for 60 cartons of bar soap. He was to deliver within a week but has only made excuses.",
-      },
-      { say: "intake.understood" },
-      { ask: "transaction.agreement_type" },
-      { trader: "We agreed by mouth at his shop." },
-      { ask: "requested_resolution" },
-      { trader: "I want him to deliver the goods." },
-      { ask: "respondent.phone" },
-      { trader: "0757 246810" },
-    ],
-    documents: [
-      {
-        file: "momo-receipt-ssemanda.png",
-        mimeType: "image/png",
-        category: "payment_evidence",
-        extraction: doc({
-          documentType: "Mobile Money payment receipt",
-          date: "2026-11-12",
-          amount: 1_500_000,
-          currency: "UGX",
-          reference: "58377120954",
-          sender: "Nakato Sarah",
-          recipient: "Ssemanda Brian",
-          description: "Payment of UGX 1,500,000 for soap cartons.",
-        }),
-      },
-    ],
+    {
+      date: "2026-11-10",
+      text: "Trader transfers UGX 2,000,000 by mobile money",
+      source: "trader",
+    },
+    { date: "2026-11-11", text: "Supplier confirms receipt of payment", source: "trader" },
+    {
+      date: "2026-11-12",
+      text: "Expected delivery date passes without delivery",
+      source: "trader",
+    },
+    {
+      date: "2026-11-14",
+      text: "Trader contacts the supplier asking about the goods",
+      source: "trader",
+    },
+    { date: "2026-11-15", text: "Supplier responds that delivery is delayed", source: "trader" },
+    {
+      date: "2026-11-18",
+      text: "Trader follows up again; no goods have been delivered",
+      source: "trader",
+    },
+  ],
+  turns: [
+    { trader: NARRATIVE },
+    { say: "intake.understood" },
+    {
+      ask: "ask.agreement",
+      stage: "agreement",
+      fields: [
+        "transaction.agreement_type",
+        "agreement_record",
+        "arbitration_agreement",
+        "mediation_clause",
+        "separate_arbitration_agreement",
+      ],
+    },
+    {
+      trader:
+        "We did not sign a formal contract. We agreed on WhatsApp and he sent me an invoice. There is nothing about arbitration or mediation in it, and no separate arbitration agreement.",
+    },
+    { ask: "ask.parties", stage: "parties", fields: ["respondent.phone"] },
+    { trader: "His number is +256 700 000 202." },
+    { ask: "ask.events", stage: "events", fields: ["previous_communication"] },
+    {
+      trader:
+        "He confirmed the payment on 11 November. On 14 November I messaged him and he said there was a delay with transport. On 18 November I followed up again and he only said he would update me.",
+    },
+    {
+      ask: "ask.outcome",
+      stage: "outcome",
+      fields: ["requested_resolution", "evidence_available"],
+    },
+    {
+      trader:
+        "I want the merchandise delivered or a refund of my money. I have the mobile money confirmation, the invoice, the WhatsApp chat and my written statement.",
+    },
+    { say: "intake.done" },
+  ],
+  documents: [
+    {
+      file: "SAMPLE_mobile_money_payment_confirmation.pdf",
+      mimeType: "application/pdf",
+      category: "payment_evidence",
+      extraction: doc({
+        documentType: "Mobile money transaction confirmation (SAMPLE)",
+        date: "2026-11-10",
+        amount: 2_000_000,
+        currency: "UGX",
+        reference: "SAMPLE-TXN-20261110-001",
+        sender: "Sarah Namusoke",
+        recipient: "Daniel Okello",
+        description: "Successful payment of UGX 2,000,000 for household merchandise.",
+      }),
+    },
+    {
+      file: "SAMPLE_commercial_invoice.pdf",
+      mimeType: "application/pdf",
+      category: "transaction_evidence",
+      extraction: doc({
+        documentType: "Commercial invoice SAMPLE-INV-2026-011",
+        date: "2026-11-10",
+        amount: 2_000_000,
+        currency: "UGX",
+        reference: "SAMPLE-INV-2026-011",
+        sender: "Okello Wholesale Supplies",
+        recipient: "Sarah's Home Essentials",
+        description:
+          "Storage containers, kitchen utensils and cleaning accessories; marked paid; delivery 12 November 2026.",
+      }),
+    },
+    {
+      file: "SAMPLE_whatsapp_supplier_conversation.png",
+      mimeType: "image/png",
+      category: "communication_evidence",
+      extraction: doc({
+        documentType: "WhatsApp conversation with the supplier (SAMPLE)",
+        date: "2026-11-10",
+        amount: 2_000_000,
+        currency: "UGX",
+        sender: "Daniel Okello",
+        description:
+          "Agrees the UGX 2,000,000 total and delivery by Thursday, confirms payment, then reports a delay.",
+      }),
+    },
+    {
+      file: "SAMPLE_trader_statement.pdf",
+      mimeType: "application/pdf",
+      category: "other",
+      extraction: doc({
+        documentType: "Trader's written statement (fictional)",
+        date: "2026-11-19",
+        amount: 2_000_000,
+        currency: "UGX",
+        sender: "Sarah Namusoke",
+        description:
+          "First-person account of the agreement, payment, missed delivery, follow-ups and the outcome wanted.",
+      }),
+    },
+  ],
+};
+
+/** A second fictional case for showing the inconsistency check: the receipt shows less than reported. */
+export const INCONSISTENCY_DEMO: DemoCase = {
+  key: "Brian Ssemanda",
+  stage: "review",
+  narrative:
+    "I paid Brian Ssemanda UGX 2,000,000 on 12 November 2026 for 60 cartons of bar soap. He was to deliver within a week but has only made excuses.",
+  values: {
+    "transaction.agreement_type": "verbal",
+    arbitration_agreement: "unsure",
+    mediation_clause: "unsure",
+    "complainant.name": "Sarah Namusoke",
+    "complainant.business_name": "Sarah's Home Essentials",
+    "complainant.phone": "+256 700 000 101",
+    "respondent.name": "Brian Ssemanda",
+    "respondent.phone": "+256 700 000 303",
+    "transaction.date": "2026-11-12",
+    "transaction.amount": 2_000_000,
+    "transaction.currency": "UGX",
+    "transaction.payment_method": "mobile_money",
+    "transaction.goods": "60 cartons of bar soap",
+    "delivery.status": "not_delivered",
+    requested_resolution: "delivery",
   },
-];
+  events: [
+    {
+      date: "2026-11-12",
+      text: "Trader pays the supplier for 60 cartons of bar soap",
+      source: "trader",
+    },
+  ],
+  turns: [
+    {
+      trader:
+        "I paid Brian Ssemanda UGX 2,000,000 on 12 November 2026 for 60 cartons of bar soap. He was to deliver within a week but has only made excuses.",
+    },
+    { say: "intake.understood" },
+    {
+      ask: "ask.agreement",
+      stage: "agreement",
+      fields: [
+        "transaction.agreement_type",
+        "agreement_record",
+        "arbitration_agreement",
+        "mediation_clause",
+        "separate_arbitration_agreement",
+      ],
+    },
+    { trader: "We agreed by mouth at his shop. I'm not sure about arbitration or mediation." },
+  ],
+  documents: [
+    {
+      file: "SAMPLE_inconsistency_receipt.png",
+      mimeType: "image/png",
+      category: "payment_evidence",
+      extraction: doc({
+        documentType: "Mobile money transaction confirmation (SAMPLE)",
+        date: "2026-11-12",
+        amount: 1_500_000,
+        currency: "UGX",
+        reference: "SAMPLE-TXN-20261112-002",
+        sender: "Sarah Namusoke",
+        recipient: "Brian Ssemanda",
+        description: "Payment of UGX 1,500,000 for soap cartons.",
+      }),
+    },
+  ],
+};
+
+export const DEMO_CASES: DemoCase[] = [PRIMARY_DEMO, INCONSISTENCY_DEMO];
+
+/** The files a presenter can download and upload live. */
+export const DEMO_FILES = PRIMARY_DEMO.documents.map((d) => d.file);

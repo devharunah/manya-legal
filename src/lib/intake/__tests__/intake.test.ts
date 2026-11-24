@@ -8,7 +8,7 @@ import {
 } from "../ground";
 import { datesIn, heuristicExtract } from "../heuristic";
 import { confirmAll, editField, markUnknown, mergeExtraction } from "../merge";
-import { completion, missingRequired, nextField } from "../progress";
+import { completion, missingRequired } from "../progress";
 
 const STORY =
   "I paid the supplier 2 million shillings on 10 November 2026 for merchandise, but the goods have not been delivered.";
@@ -91,7 +91,6 @@ describe("edits and unknowns", () => {
   it("records an unknown field and stops asking for it", () => {
     let intake: Intake = emptyIntake();
     intake = markUnknown(intake, "complainant.name");
-    expect(nextField(intake)).toBe("complainant.phone");
     expect(missingRequired(intake)).not.toContain("complainant.name");
   });
 
@@ -114,15 +113,14 @@ describe("edits and unknowns", () => {
 });
 
 describe("progress", () => {
-  it("asks required fields first, in PRD order", () => {
-    expect(nextField(emptyIntake())).toBe("complainant.name");
+  it("starts at zero", () => {
     expect(completion(emptyIntake())).toBe(0);
   });
 });
 
 describe("heuristicExtract", () => {
   it("reads the demo story", () => {
-    const { extraction, category } = heuristicExtract(STORY, null);
+    const { extraction, category } = heuristicExtract(STORY, []);
     expect(category).toBe("supplier_non_delivery");
     expect(extraction).toMatchObject({
       "transaction.amount": 2_000_000,
@@ -133,9 +131,9 @@ describe("heuristicExtract", () => {
   });
 
   it("takes a free-text answer for the field being asked", () => {
-    expect(heuristicExtract("Kato Traders", "respondent.name").extraction["respondent.name"]).toBe(
-      "Kato Traders",
-    );
+    expect(
+      heuristicExtract("Kato Traders", ["respondent.name"]).extraction["respondent.name"],
+    ).toBe("Kato Traders");
   });
 
   it("parses written dates", () => {
