@@ -1,33 +1,38 @@
+"use client";
+
 import { CheckCircle2, History, Info } from "lucide-react";
 
+import type { MessageKey } from "@/lib/i18n/en";
+import { useT } from "@/lib/i18n/use-t";
 import type { Currency } from "@/lib/kb/types";
 
-const STYLES: Record<Currency, { label: string; className: string; Icon: typeof Info }> = {
+const STYLES: Record<Currency, { label: MessageKey; className: string; Icon: typeof Info }> = {
   current: {
-    label: "Current guidance",
+    label: "currency.current",
     className: "bg-emerald-50 text-emerald-800 ring-emerald-200",
     Icon: CheckCircle2,
   },
   secondary: {
-    label: "Official summary. Confirm",
+    label: "currency.secondary",
     className: "bg-gold-50 text-gold-700 ring-gold-200",
     Icon: Info,
   },
   historical: {
-    label: "Older text, may be outdated",
+    label: "currency.historical",
     className: "bg-orange-50 text-orange-800 ring-orange-200",
     Icon: History,
   },
 };
 
 export function CurrencyBadge({ currency }: { currency: Currency }) {
+  const t = useT();
   const { label, className, Icon } = STYLES[currency];
   return (
     <span
       className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold ring-1 ring-inset ${className}`}
     >
       <Icon className="size-3" aria-hidden />
-      {label}
+      {t(label)}
     </span>
   );
 }

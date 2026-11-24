@@ -1,0 +1,49 @@
+import { z } from "zod";
+
+import { fail, json, withStore } from "@/lib/api";
+import { type TraderInput, TranslationError, intakeTurn } from "@/lib/intake/engine";
+import { extractFields } from "@/lib/intake/extract";
+import { FIELD_KEYS, type FieldKey } from "@/lib/intake/fields";
+import { getVoiceProvider, hasVoice } from "@/lib/voice/provider";
+
+export const maxDuration = 60;
+
+const bodySchema = z.union([
+  z.object({
+    text: z.string().trim().min(1).max(1500),
+    inputType: z.enum(["text", "voice"]),
+  }),
+  z.object({ skip: z.enum(FIELD_KEYS as [FieldKey, ...FieldKey[]]) }),
+]);
+
+/** One trader message (or "I don't know") into the guided intake. */
+export const POST = (req: Request, ctx: RouteContext<"/api/cases/[id]/messages">) =>
+  withStore(async (store) => {
+    const { id } = await ctx.params;
+    const parsed = bodySchema.safeParse(await req.json().catch(() => null));
+    if (!parsed.success) return fail("Write a message of up to 1,500 characters.", 400);
+    const record = await store.getCase(id);
+    if (!record) return fail("Case not found.", 404);
+    if (record.status === "completed") return fail("This case is closed.", 409);
+
+    const input: TraderInput =
+      "skip" in parsed.data
+        ? { kind: "skip", field: parsed.data.skip }
+        : { kind: "message", text: parsed.data.text, inputType: parsed.data.inputType };
+    if (record.language === "lug" && input.kind === "message" && !hasVoice()) {
+      return fail("Luganda isn't available right now. Please switch to English.", 503);
+    }
+
+    try {
+      const result = await intakeTurn(store, record, input, {
+        extract: extractFields,
+        toEnglish: (text) => getVoiceProvider().translate(text, "eng", "lug"),
+      });
+      return json(result);
+    } catch (error) {
+      if (error instanceof TranslationError) {
+        return fail("We couldn't translate your message. Try again, or switch to English.", 502);
+      }
+      throw error;
+    }
+  });

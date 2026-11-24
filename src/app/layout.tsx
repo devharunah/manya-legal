@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { Fraunces, Plus_Jakarta_Sans } from "next/font/google";
 
+import { SessionProvider } from "@/components/app/session";
+import { HtmlLang } from "@/components/html-lang";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 
@@ -10,9 +12,9 @@ const jakarta = Plus_Jakarta_Sans({ subsets: ["latin"], variable: "--font-jakart
 const fraunces = Fraunces({ subsets: ["latin"], variable: "--font-fraunces" });
 
 export const metadata: Metadata = {
-  title: "Manya Legal | SME Legal Companion",
+  title: "MANYA | Commercial Justice Companion",
   description:
-    "Plain-language, source-cited guidance on Ugandan business law for small businesses. Hack4Justice 2026.",
+    "Report a supplier dispute in Luganda or English, organise your evidence, and find the right way to resolve it. Hack4Justice 2026.",
 };
 
 export const viewport: Viewport = {
@@ -27,9 +29,12 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${jakarta.variable} ${fraunces.variable}`}>
       <body className="flex min-h-screen flex-col">
-        <SiteHeader />
-        <div className="flex-1">{children}</div>
-        <SiteFooter />
+        <SessionProvider>
+          <HtmlLang />
+          <SiteHeader />
+          <div className="flex-1">{children}</div>
+          <SiteFooter />
+        </SessionProvider>
       </body>
     </html>
   );

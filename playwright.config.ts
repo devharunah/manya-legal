@@ -14,11 +14,11 @@ export default defineConfig({
   },
   webServer: {
     command: "pnpm build && pnpm start",
-    // Voice uses the fixture in e2e, even when .env.local holds a real key, so
+    // Voice, the AI model and storage use fixtures in e2e, even when .env.local holds a real key, so
     // tests don't spend free-tier credits or depend on the network. Caveat:
     // locally, an already-running server on :3000 is reused as-is, without
     // this variable. Stop your dev server before `pnpm e2e`.
-    env: { E2E_MOCK_VOICE: "1" },
+    env: { E2E_MOCK_VOICE: "1", E2E_MOCK_LLM: "1", E2E_MOCK_DB: "1" },
     url: "http://127.0.0.1:3000",
     timeout: 180_000,
     reuseExistingServer: !isCI,

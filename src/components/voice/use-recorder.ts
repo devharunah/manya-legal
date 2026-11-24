@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { TARGET_RATE, encodeWav, mixToMono, resample } from "@/lib/audio/wav";
+import type { MessageKey } from "@/lib/i18n/en";
 
 export const MAX_SECONDS = 30;
 
@@ -26,17 +27,17 @@ async function toWav(recorded: Blob): Promise<Blob> {
   }
 }
 
-function micError(error: unknown): string {
+/** Which message to show for a failed recording, as a key for the interface language. */
+function micError(error: unknown): MessageKey {
   const name = error instanceof DOMException ? error.name : "";
   if (name === "NotAllowedError" || name === "SecurityError") {
-    return "Microphone access was blocked. Allow the microphone in your browser settings, or type your question.";
+    return "mic.blocked";
   }
-  if (name === "NotFoundError")
-    return "No microphone found on this device. Please type your question.";
+  if (name === "NotFoundError") return "mic.notFound";
   if (name === "NotSupportedError" || name === "NotReadableError") {
-    return "This browser can't record audio right now. Try Chrome on your phone, or type your question.";
+    return "mic.unsupported";
   }
-  return "We couldn't start recording. Please type your question instead.";
+  return "mic.failed";
 }
 
 /**
@@ -46,7 +47,7 @@ function micError(error: unknown): string {
 export function useRecorder(onRecorded: (wav: Blob) => void) {
   const [state, setState] = useState<RecorderState>("idle");
   const [seconds, setSeconds] = useState(0);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<MessageKey | null>(null);
   const recorder = useRef<MediaRecorder | null>(null);
   const timer = useRef<ReturnType<typeof setInterval> | null>(null);
   // Set from the first tap until recording starts, so a double tap can't open two microphones.
@@ -111,7 +112,7 @@ export function useRecorder(onRecorded: (wav: Blob) => void) {
         const wav = await toWav(new Blob(chunks, { type: rec.mimeType }));
         onRecordedRef.current(wav);
       } catch {
-        setError("We couldn't process that recording. Please try again.");
+        setError("mic.processFailed");
       } finally {
         setState("idle");
         setSeconds(0);
