@@ -59,6 +59,36 @@ export interface CitedSource {
   asOf: string | null;
 }
 
+/**
+ * The readable text of an answer, without sources or flags. This is what gets
+ * translated: citations, statuses and source texts never change language.
+ * `lawSays` lines up index for index with `Answer.lawSays`.
+ */
+export interface AnswerText {
+  directAnswer: string;
+  lawSays: string[];
+  meansForYou: string;
+  nextSteps: string[];
+  clarifyingQuestions: string[];
+  uncertainty: string;
+  warnings: string[];
+}
+
+/** A piece of Luganda the server agreed to read aloud, with its signature. */
+export interface SpeechPiece {
+  text: string;
+  sig: string;
+}
+
+/** What /api/voice/answer returns. */
+export interface LugandaAnswer {
+  text: AnswerText;
+  /** Lines shown in English because translation failed or changed a number. */
+  keptInEnglish: number;
+  /** Pre-split, signed speech: the whole answer, and just the next steps. */
+  speech: { all: SpeechPiece[]; steps: SpeechPiece[] };
+}
+
 export interface Answer {
   status: ModelAnswer["status"];
   /** ai: explained by the model. sources-only: no model call, matching provisions shown. */
@@ -73,4 +103,6 @@ export interface Answer {
   sources: CitedSource[];
   referrals: Referral[];
   warnings: string[];
+  /** Present when voice is on: lets /api/voice/answer translate this answer and nothing else. */
+  voiceToken?: string;
 }
