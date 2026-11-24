@@ -1,89 +1,87 @@
 import type { Source } from "@/lib/kb/types";
 
+/**
+ * Official sources behind MANYA's resolution guidance. Every one was fetched
+ * on the `accessed` date from the URL shown; nothing is written from memory.
+ */
 export const SOURCES: Source[] = [
   {
-    id: "tla",
+    id: "sogssa",
     title:
-      "Trade (Licensing) Act, Chapter 79 (formerly Cap. 101), revised edition as at 31 December 2000",
-    shortTitle: "Trade (Licensing) Act",
-    publisher: "Uganda Legal Information Institute (ULII) / Laws.Africa",
+      "The Sale of Goods and Supply of Services Act, 2018 (Act 10 of 2018), Acts Supplement No. 3 to The Uganda Gazette No. 43, 17 August 2018",
+    shortTitle: "Sale of Goods and Supply of Services Act",
+    publisher: "Uganda Printing and Publishing Corporation (official Gazette, via Gazettes.Africa)",
     kind: "statute",
-    url: "https://ulii.org/akn/ug/act/1969/14/eng@2000-12-31",
-    asOf: "2000-12-31",
-    accessed: "2026-11-18",
+    url: "https://archive.gazettes.africa/archive/ug/2018/ug-government-gazette-dated-2018-08-17-no-43.pdf",
+    asOf: "2018-08-17",
+    accessed: "2026-11-24",
+    currency: "current",
+    currencyNote:
+      "Text as enacted (commenced 17 August 2018); no amending Act found. Sometimes called the 2017 Act. Its chapter number in the 2023 revised edition was not verified.",
+  },
+  {
+    id: "scp-rules",
+    title: "The Judicature (Small Claims Procedure) Rules, 2011 (S.I. No. 25 of 2011)",
+    shortTitle: "Small Claims Procedure Rules",
+    publisher: "Uganda Printing and Publishing Corporation (official Gazette, via Gazettes.Africa)",
+    kind: "regulation",
+    url: "https://archive.gazettes.africa/archive/ug/2011/ug-government-gazette-dated-2011-05-27-no-36.pdf",
+    asOf: "2011-05-30",
+    accessed: "2026-11-24",
+    currency: "current",
+    currencyNote:
+      "Text as made (in force 30 May 2011). No amendment to the UGX 10,000,000 limit was found. Rules 8(2)-(3) and 24 were reportedly struck down by the Constitutional Court in 2021 and that ruling was reportedly stayed by the Supreme Court; their current status is unresolved.",
+  },
+  {
+    id: "scp-leaflet",
+    title: "The Small Claims Procedure (information leaflet), Courts of Judicature",
+    shortTitle: "Judiciary small claims leaflet",
+    publisher: "Judiciary of Uganda",
+    kind: "official-guidance",
+    url: "https://judiciary.go.ug/files/downloads/Small%20claims%20english%20version.pdf",
+    asOf: null,
+    accessed: "2026-11-24",
     currency: "historical",
     currencyNote:
-      "This is the official text as it stood from 2000 to 2011. The Act was amended in 2015 (Trade (Licensing) (Amendment) Act, 2015) and revised again as at 31 December 2023. Penalty amounts and the licence period shown here have since changed. Check the current revised edition on ULII before relying on exact wording.",
+      "Undated leaflet from about 2012, before the 2021 court rulings on legal representation. Use it as background only.",
   },
   {
-    id: "tla-amendment-2015",
-    title: "Trade (Licensing) (Amendment) Act, 2015 (Act 6 of 2015)",
-    shortTitle: "Trade (Licensing) (Amendment) Act, 2015",
-    publisher: "Parliament of Uganda",
+    id: "aca",
+    title:
+      "Arbitration and Conciliation Act, Chapter 5 (consolidated as at 23 December 2024, including Act 44 of 2024)",
+    shortTitle: "Arbitration and Conciliation Act",
+    publisher: "ULII / Laws.Africa consolidation, via WIPO Lex",
     kind: "statute",
-    url: "https://commons.laws.africa/akn/ug/act/2015/6/media/publication/ug-act-2015-6-publication-document.pdf",
-    asOf: null,
-    accessed: "2026-11-18",
-    currency: "secondary",
-    currencyNote:
-      "We describe this amendment from KCCA and URA guidance, not from the Act's own text. Confirm specific provisions and penalty amounts in the Act itself or with KCCA.",
-  },
-  {
-    id: "ura-formalisation",
-    title: "Formalising a Business, Vol. 1 Issue 2, FY 2024-25",
-    shortTitle: "URA: Formalising a Business (2024-25)",
-    publisher: "Uganda Revenue Authority",
-    kind: "official-guidance",
-    url: "https://ura.go.ug/storage/2024/01/BUSINESS-FORMALISATION-ENGLISH-FY-2024-25.pdf",
-    asOf: "2024-07-01",
-    accessed: "2026-11-18",
+    url: "https://www.wipo.int/wipolex/en/legislation/details/24066",
+    asOf: "2024-12-23",
+    accessed: "2026-11-24",
     currency: "current",
     currencyNote:
-      "Official URA guidance for FY 2024-25. URA notes it is for guidance and may change when tax laws or regulations are amended.",
+      "Consolidated text, not the official Gazette. Includes the 2024 amendment that made CADR a department of the Ministry of Justice and Constitutional Affairs.",
   },
   {
-    id: "kcca-trade-licence",
-    title: "Trading Licence: Frequently Asked Questions",
-    shortTitle: "KCCA Trading Licence FAQs",
-    publisher: "Kampala Capital City Authority",
+    id: "cadr-page",
+    title: "Arbitration and ADR (CADR), Ministry of Justice and Constitutional Affairs",
+    shortTitle: "CADR page, Ministry of Justice",
+    publisher: "Ministry of Justice and Constitutional Affairs",
     kind: "official-guidance",
-    url: "https://www.kcca.go.ug/uDocs/Trade_Licence_FAQs.pdf",
+    url: "https://justice.go.ug/arbitration-and-adrcadr/",
     asOf: null,
-    accessed: "2026-11-18",
-    currency: "secondary",
-    currencyNote:
-      "KCCA's own summary of trading-licence rules in Kampala. Fees and procedures are set by KCCA and can change; confirm at a KCCA division office or kcca.go.ug.",
+    accessed: "2026-11-24",
+    currency: "current",
+    currencyNote: "Undated web page; lists no public mediation service or fees.",
   },
   {
-    id: "kcca-trading-licence-notice",
-    title: "Trading Licence notice: The Trade (Licensing) Act, Cap. 101",
-    shortTitle: "KCCA Trading Licence notice",
-    publisher: "Kampala Capital City Authority",
-    kind: "official-guidance",
-    url: "https://www.kcca.go.ug/uploads/Trading%20Licence.pdf",
-    asOf: null,
-    accessed: "2026-11-18",
-    currency: "secondary",
-    currencyNote:
-      "KCCA's public notice summarising offences under the Act as amended. It does not state the current fine amount; confirm with KCCA or the amended Act.",
-  },
-  {
-    id: "grading-2017",
-    title: "Trade (Licensing) (Grading of Business Areas) Instrument, 2017 (S.I. No. 1 of 2017)",
-    shortTitle: "Grading of Business Areas Instrument, 2017",
-    publisher: "Minister of Trade, Industry and Cooperatives (via ULII)",
+    id: "mediation-2026",
+    title: "The Judicature (Court Annexed Mediation) Rules, 2026 (S.I. No. 14 of 2026)",
+    shortTitle: "Court Annexed Mediation Rules, 2026",
+    publisher: "Uganda Printing and Publishing Corporation, published by the Judiciary of Uganda",
     kind: "regulation",
-    url: "https://ulii.org/en/search/?q=Trade+(Licensing)+(Grading+of+Business+Areas)+Instrument",
-    asOf: "2017-01-13",
-    accessed: "2026-11-18",
+    url: "https://judiciary.go.ug/files/downloads/The%20Judicature%20(Court%20Annexed%20Mediation)%20Rules,%202026.pdf",
+    asOf: "2026-03-27",
+    accessed: "2026-11-24",
     currency: "current",
     currencyNote:
-      "Grades business areas for licence-fee purposes. Fee amounts are set in the Schedule and by KCCA and may have been revised; confirm the fee for your area with KCCA.",
+      "Gazetted 27 March 2026; revokes the Judicature (Mediation) Rules, 2013. Applies to cases already filed in court where both parties consent.",
   },
 ];
-
-export function getSource(id: string): Source {
-  const source = SOURCES.find((s) => s.id === id);
-  if (!source) throw new Error(`Unknown source ${id}`);
-  return source;
-}

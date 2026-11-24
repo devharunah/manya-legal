@@ -41,7 +41,7 @@ export function writeReport(w: PdfWriter, input: ReportInput) {
 
   w.title(REPORT_TITLE, `${record.reference} · Version ${input.version} · Prepared ${prepared}`);
   w.paragraph(
-    "A dispute preparation document drawing on the information typically requested for mediation. It is not an official court form or a prescribed ADR document.",
+    "A dispute preparation document. It draws on the elements of Form 2 (Content of Mediation Summary) of the Judicature (Court Annexed Mediation) Rules, 2026 (S.I. No. 14 of 2026) where appropriate. It is not an official court form or a prescribed ADR document.",
     { muted: true, size: 9 },
   );
 
