@@ -4,9 +4,12 @@ import { z } from "zod";
 import { getModels, hasApiKey } from "@/lib/ai/model";
 import { refusal, sourcesOnly, validateModelAnswer } from "@/lib/answer/assemble";
 import { INSTRUCTIONS, buildPrompt } from "@/lib/answer/prompt";
-import { modelAnswerSchema } from "@/lib/answer/types";
+import { toAnswerText } from "@/lib/answer/text";
+import { type Answer, modelAnswerSchema } from "@/lib/answer/types";
 import { retrieve } from "@/lib/kb/retrieve";
 import { profileSchema } from "@/lib/profile";
+import { hasVoice } from "@/lib/voice/provider";
+import { signAnswer } from "@/lib/voice/sign";
 
 export const maxDuration = 60;
 
@@ -20,6 +23,13 @@ const bodySchema = z.object({
   profile: profileSchema,
 });
 
+/** Every answer leaves through here, so the voice token covers all three paths. */
+function respond(answer: Answer): Response {
+  if (!hasVoice()) return Response.json(answer);
+  const supported = answer.lawSays.map((l) => l.supported);
+  return Response.json({ ...answer, voiceToken: signAnswer(toAnswerText(answer), supported) });
+}
+
 export async function POST(req: Request) {
   const parsed = bodySchema.safeParse(await req.json().catch(() => null));
   if (!parsed.success) {
@@ -31,10 +41,10 @@ export async function POST(req: Request) {
   const { question, profile } = parsed.data;
 
   const retrieval = retrieve(question);
-  if (!retrieval.covered) return Response.json(refusal());
+  if (!retrieval.covered) return respond(refusal());
 
   if (process.env["E2E_MOCK_LLM"] || !hasApiKey()) {
-    return Response.json(sourcesOnly(retrieval.hits));
+    return respond(sourcesOnly(retrieval.hits));
   }
 
   const prompt = buildPrompt(question, profile, retrieval.hits);
@@ -58,10 +68,10 @@ export async function POST(req: Request) {
         providerOptions: { openai: { reasoningEffort: "low" } },
         abortSignal: AbortSignal.timeout(isLast ? remaining : Math.min(ATTEMPT_MS, remaining)),
       });
-      return Response.json(validateModelAnswer(object, retrieval.hits));
+      return respond(validateModelAnswer(object, retrieval.hits));
     } catch (error) {
       console.error(`[ask] model ${id} failed`, error instanceof Error ? error.message : error);
     }
   }
-  return Response.json(sourcesOnly(retrieval.hits));
+  return respond(sourcesOnly(retrieval.hits));
 }
