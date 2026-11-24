@@ -1,8 +1,9 @@
-import { createTextStreamResponse, streamText, toTextStream } from "ai";
+import { createTextStreamResponse, streamText } from "ai";
 
 import { getModels, hasApiKey } from "@/lib/ai/model";
 import { fail, withStore } from "@/lib/api";
 import { optionalEnv } from "@/lib/env";
+import type { Intake } from "@/lib/intake/fields";
 import { SUMMARY_INSTRUCTIONS, summaryFacts, templateSummary } from "@/lib/intake/summary";
 
 export const maxDuration = 30;
@@ -12,17 +13,53 @@ const rulesOnly = () =>
   !hasApiKey();
 
 /** Streams a fixed text word by word, so the no-AI path looks and behaves the same. */
-function streamOf(text: string): ReadableStream<string> {
-  const words = text.split(/(?<=\s)/);
-  let i = 0;
+async function* words(text: string): AsyncGenerator<string> {
+  for (const word of text.split(/(?<=\s)/)) {
+    yield word;
+    await new Promise((r) => setTimeout(r, 15));
+  }
+}
+
+/**
+ * Model text, falling through the model chain until one actually starts
+ * streaming (a busy or out-of-quota model fails on its first chunk), and
+ * finally the no-AI summary, so the trader never gets an empty box.
+ */
+async function* summaryText(intake: Intake): AsyncGenerator<string> {
+  for (const { id, model } of getModels()) {
+    let started = false;
+    try {
+      const result = streamText({
+        model,
+        instructions: SUMMARY_INSTRUCTIONS,
+        prompt: summaryFacts(intake),
+        maxRetries: 0,
+        abortSignal: AbortSignal.timeout(20_000),
+        providerOptions: { openai: { reasoningEffort: "low" } },
+      });
+      for await (const delta of result.textStream) {
+        started = true;
+        yield delta;
+      }
+      if (started) return;
+    } catch (error) {
+      console.error(`[summary] ${id} failed`, error instanceof Error ? error.message : error);
+      // Text already sent can't be taken back; stop rather than mix two summaries.
+      if (started) return;
+    }
+  }
+  yield* words(templateSummary(intake));
+}
+
+function toStream(source: AsyncGenerator<string>): ReadableStream<string> {
   return new ReadableStream<string>({
     async pull(controller) {
-      if (i >= words.length) {
-        controller.close();
-        return;
-      }
-      controller.enqueue(words[i++] as string);
-      await new Promise((r) => setTimeout(r, 15));
+      const { value, done } = await source.next();
+      if (done) controller.close();
+      else controller.enqueue(value);
+    },
+    async cancel() {
+      await source.return(undefined);
     },
   });
 }
@@ -40,24 +77,8 @@ export const POST = (_req: Request, ctx: RouteContext<"/api/cases/[id]/summary">
     if (!record.intake.narrative && Object.keys(record.intake.values).length === 0) {
       return fail("Tell MANYA what happened first.", 409);
     }
-
-    const headers = { "cache-control": "no-store" };
-    if (rulesOnly()) {
-      return createTextStreamResponse({
-        headers,
-        stream: streamOf(templateSummary(record.intake)),
-      });
-    }
-    const first = getModels()[0];
-    if (!first) return fail("The AI service is not available right now.", 503);
-    const result = streamText({
-      model: first.model,
-      instructions: SUMMARY_INSTRUCTIONS,
-      prompt: summaryFacts(record.intake),
-      maxRetries: 1,
-      providerOptions: { openai: { reasoningEffort: "low" } },
-      onError: ({ error }) =>
-        console.error("[summary] stream failed", error instanceof Error ? error.message : error),
-    });
-    return createTextStreamResponse({ headers, stream: toTextStream({ stream: result.stream }) });
+    const stream = toStream(
+      rulesOnly() ? words(templateSummary(record.intake)) : summaryText(record.intake),
+    );
+    return createTextStreamResponse({ headers: { "cache-control": "no-store" }, stream });
   });
