@@ -108,8 +108,6 @@ export const lug: Partial<Messages> = {
     "MANYA kati ategeka alipoota z'okulwanirira obutatuuka kwa bintu okuva mu basuubuzi. Nja kusigala nga nkwata ebyo by'ompa, naye obulagirizi buyinza obutakwatagana na mbeera yo.",
   "intake.done": "Webale. Nnina kyonna kye njagala. Bambi weekenneenye lipoota yo wansi.",
   "intake.reviewNow": "Ddamu okwekenneenya alipoota yange",
-  "intake.micHint":
-    "Kuba ku mikrofooni okwogera (okutuuka ku ssekonda 30). Kebera ebigambo nga tonasindika.",
   "intake.voiceNotice":
     "Obubaka obw'eddoboozi n'obuwandiike bw'Oluganda bitwalibwa ku Sunbird AI okukyusa n'okuvvuunula; Sunbird ayinza okukuuma kopi.",
   "intake.aiNotice":

@@ -12,8 +12,8 @@ export interface SpeechAudio {
  */
 export interface VoiceProvider {
   readonly name: string;
-  /** Luganda speech to Luganda text. */
-  transcribe(audio: Blob): Promise<string>;
+  /** Speech to text in the given language (Luganda by default). */
+  transcribe(audio: Blob, language?: VoiceLanguage): Promise<string>;
   /** Omit `from` to let the service detect it; text already in `to` comes back unchanged. */
   translate(text: string, to: VoiceLanguage, from?: VoiceLanguage): Promise<string>;
   /** Luganda text to speech. */

@@ -105,6 +105,7 @@ export const en = {
   "intake.greeting":
     "Hello. Tell me what happened with your supplier, in your own words. You can type or record a voice note.",
   "intake.label": "Your message",
+  "intake.answerHere": "Type your answer, or tap the microphone and speak",
   "intake.placeholder":
     "e.g. I paid a supplier 2,000,000 shillings for goods but they never delivered.",
   "intake.send": "Send",
@@ -120,7 +121,7 @@ export const en = {
   "intake.done": "Thank you. I have what I need. Please review your report below.",
   "intake.reviewNow": "Review my report",
   "intake.micHint":
-    "Tap the microphone to speak (up to 30 seconds). Check the text before sending.",
+    "Tap the microphone and speak: your words appear as you talk. Tap the square to stop, check the text, then tap the arrow to send.",
   "intake.voiceNotice":
     "Voice notes and Luganda text are sent to Sunbird AI to transcribe and translate; Sunbird may keep a copy.",
   "intake.aiNotice": "MANYA uses AI to read your messages. Check everything on the review screen.",
@@ -201,6 +202,17 @@ export const en = {
   "review.error": "We couldn't create the report. Please try again.",
   "review.disclaimer":
     "This report has been prepared from information provided by the reporting party and supporting materials made available to MANYA. It is a dispute preparation document, not a legal determination, certified statement or finding of liability.",
+
+  "summary.title": "AI summary",
+  "summary.body": "Get a short summary of what you reported, written by AI from your answers only.",
+  "summary.create": "Summarise",
+  "summary.again": "Summarise again",
+  "summary.stop": "Stop",
+  "summary.writing": "Writing…",
+  "summary.translating": "Translating into Luganda…",
+  "summary.notice":
+    "Written by AI from your answers only. It is not legal advice; check it against your report.",
+  "summary.error": "The summary isn't available right now. Your report is unaffected.",
 
   "evidence.title": "Supporting evidence",
   "evidence.body":
@@ -364,6 +376,11 @@ export const en = {
   "mic.failed": "We couldn't start recording. Please type instead.",
   "mic.processFailed": "We couldn't process that recording. Please try again.",
   "mic.transcribeFailed": "We couldn't turn your voice into text. Please try again or type.",
+  "mic.listening": "Listening… your words will appear here",
+  "mic.finishing": "Finishing the transcription…",
+  "mic.silent":
+    "We didn't hear anything. Check that your microphone is on and not muted, then try again.",
+  "mic.noWords": "We couldn't make out any words. Try again, a little closer to the phone.",
 
   "currency.current": "Current law",
   "currency.secondary": "Official summary. Confirm",

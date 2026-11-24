@@ -10,10 +10,20 @@ async function readJson<T>(res: Response): Promise<T> {
   return data as T;
 }
 
-/** Luganda voice note to Luganda text, for the trader to check before sending. */
-export async function transcribe(wav: Blob): Promise<string> {
+/** Voice note to text, for the trader to check before sending. */
+export class NoSpeechError extends Error {
+  constructor() {
+    super("No words heard");
+    this.name = "NoSpeechError";
+  }
+}
+
+export async function transcribe(wav: Blob, language: "lug" | "eng" = "lug"): Promise<string> {
   const form = new FormData();
   form.append("audio", wav, "question.wav");
+  form.append("language", language);
   const res = await fetch("/api/voice/transcribe", { method: "POST", body: form });
+  // 422: the service heard no words yet. Normal for the first seconds of a live recording.
+  if (res.status === 422) throw new NoSpeechError();
   return (await readJson<{ text: string }>(res)).text;
 }

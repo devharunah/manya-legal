@@ -1,5 +1,7 @@
+import { hasApiKey } from "@/lib/ai/provider";
 import { optionalEnv, requireEnv } from "@/lib/env";
 
+import { withFallback } from "./fallback";
 import { createMockVoice } from "./mock";
 import { createSunbird } from "./sunbird";
 import type { VoiceProvider } from "./types";
@@ -19,8 +21,12 @@ export function hasVoice(): boolean {
 /** Built per request, like the AI model, so builds run without a key. */
 export function getVoiceProvider(): VoiceProvider {
   if (isMockVoice()) return createMockVoice();
-  return createSunbird({
+  const sunbird = createSunbird({
     apiKey: requireEnv("SUNBIRD_API_KEY"),
     voice: optionalEnv("SUNBIRD_TTS_VOICE", "Namuli"),
   });
+  // When Sunbird is down or over its daily quota, the AI model transcribes and translates.
+  return hasApiKey()
+    ? withFallback(sunbird, () => import("./fallback-model").then((m) => m.createModelVoice()))
+    : sunbird;
 }

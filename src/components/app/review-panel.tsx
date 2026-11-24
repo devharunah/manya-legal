@@ -9,6 +9,7 @@ import { displayValue } from "@/lib/intake/display";
 import { FIELDS, type FieldKey, type FieldSpec } from "@/lib/intake/fields";
 import { missingRequired } from "@/lib/intake/progress";
 
+import { CaseSummary } from "./case-summary";
 import { api } from "./client-api";
 import type { WorkspaceUpdate } from "./workspace-types";
 
@@ -135,6 +136,10 @@ export function ReviewPanel({
         {t("review.title")}
       </h2>
       <p className="mt-1 text-sm text-muted">{t("review.body")}</p>
+
+      <div className="mt-4">
+        <CaseSummary key={record.updatedAt} caseId={record.id} />
+      </div>
 
       {intake.narrative && (
         <blockquote className="mt-4 rounded-xl bg-brand-50 p-4 text-sm leading-6 text-brand-900">

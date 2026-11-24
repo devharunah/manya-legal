@@ -52,7 +52,13 @@ describe("Sunbird adapter", () => {
     expect(JSON.parse(String(calls[0]?.init.body))).not.toHaveProperty("source_language");
   });
 
-  it("always sends Luganda as the transcription language", async () => {
+  it("sends English when asked, so English voice notes aren't read as Luganda", async () => {
+    const { fn, calls } = fakeFetch(json({ audio_transcription: "I paid him" }));
+    await sunbird(fn).transcribe(new Blob(["x"], { type: "audio/wav" }), "eng");
+    expect((calls[0]?.init.body as FormData).get("language")).toBe("eng");
+  });
+
+  it("sends Luganda as the transcription language by default", async () => {
     const { fn, calls } = fakeFetch(json({ audio_transcription: "Nkole ki?" }));
     const text = await sunbird(fn).transcribe(new Blob(["x"], { type: "audio/wav" }));
     expect(text).toBe("Nkole ki?");

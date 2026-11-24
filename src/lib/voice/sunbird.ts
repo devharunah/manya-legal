@@ -76,11 +76,11 @@ export function createSunbird(options: SunbirdOptions): VoiceProvider {
   return {
     name: "sunbird",
 
-    async transcribe(audio) {
+    async transcribe(audio, language = "lug") {
       const form = new FormData();
       form.append("audio", audio, "question.wav");
-      // Auto-detect is unreliable per Sunbird's docs, so always say Luganda.
-      form.append("language", "lug");
+      // Auto-detect is unreliable per Sunbird's docs, so always name the language.
+      form.append("language", language);
       const res = await post("/tasks/audio/transcriptions", form, false);
       const parsed = transcriptionSchema.safeParse(await res.json());
       if (!parsed.success) throw new VoiceServiceError("Unexpected transcription response");

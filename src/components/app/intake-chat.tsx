@@ -1,15 +1,14 @@
 "use client";
 
-import { ClipboardCheck, Info, Loader2, Send } from "lucide-react";
+import { ClipboardCheck, Info, Loader2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
-import { MicButton } from "@/components/voice/mic-button";
 import type { CaseRecord, Message } from "@/lib/cases/types";
-import type { MessageKey } from "@/lib/i18n/en";
 import { lookup, useT } from "@/lib/i18n/use-t";
 import { useLanguage } from "@/lib/use-language";
 
 import { api } from "./client-api";
+import { Composer } from "./composer";
 import type { WorkspaceUpdate } from "./workspace-types";
 
 function Bubble({ m }: { m: Message }) {
@@ -53,8 +52,6 @@ export function IntakeChat({
 }) {
   const t = useT();
   const [lang] = useLanguage();
-  const [text, setText] = useState("");
-  const [inputType, setInputType] = useState<"text" | "voice">("text");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const endRef = useRef<HTMLLIElement>(null);
@@ -71,7 +68,7 @@ export function IntakeChat({
     endRef.current?.scrollIntoView({ block: "nearest" });
   }, [messages.length]);
 
-  async function post(body: unknown) {
+  async function post(body: unknown): Promise<boolean> {
     setBusy(true);
     setError(null);
     try {
@@ -86,10 +83,10 @@ export function IntakeChat({
         { body },
       );
       update((w) => ({ ...w, case: r.case, messages: [...w.messages, ...r.added] }));
-      setText("");
-      setInputType("text");
+      return true;
     } catch (e) {
       setError(lang === "en" ? (e as Error).message : t("intake.error"));
+      return false;
     } finally {
       setBusy(false);
     }
@@ -133,43 +130,12 @@ export function IntakeChat({
       </ol>
 
       {open && (
-        <form
-          className="mt-3"
-          onSubmit={(e) => {
-            e.preventDefault();
-            if (text.trim()) void post({ text: text.trim(), inputType });
-          }}
-        >
-          <label htmlFor="intake-input" className="sr-only">
-            {t("intake.label")}
-          </label>
-          <div className="flex items-end gap-2">
-            <textarea
-              id="intake-input"
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-              rows={2}
-              maxLength={1500}
-              placeholder={messages.length === 0 ? t("intake.placeholder") : ""}
-              className="min-h-12 flex-1 resize-none rounded-xl border border-line bg-white px-3.5 py-3 text-base shadow-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-200"
-            />
-            <MicButton
-              disabled={busy}
-              onTranscript={(heard) => {
-                setText(heard);
-                setInputType("voice");
-              }}
-              onError={setError}
-            />
-            <button
-              type="submit"
-              disabled={busy || !text.trim()}
-              aria-label={t("intake.send")}
-              className="grid size-12 shrink-0 place-items-center rounded-xl bg-brand-800 text-white shadow-sm transition hover:bg-brand-700 disabled:opacity-50"
-            >
-              <Send className="size-5" aria-hidden />
-            </button>
-          </div>
+        <div className="mt-3">
+          <Composer
+            busy={busy}
+            placeholder={messages.length === 0 ? t("intake.placeholder") : t("intake.answerHere")}
+            onSend={(text, inputType) => post({ text, inputType })}
+          />
           <div className="mt-2 flex flex-wrap items-center gap-2">
             {asking && (
               <button
@@ -200,9 +166,9 @@ export function IntakeChat({
           <p className="mt-3 flex gap-1.5 text-xs leading-5 text-muted">
             <Info className="mt-0.5 size-3.5 shrink-0" aria-hidden />
             {t("intake.micHint")} {t("intake.aiNotice")}{" "}
-            {lang === "lug" ? t("intake.voiceNotice" as MessageKey) : ""}
+            {lang === "lug" ? t("intake.voiceNotice") : ""}
           </p>
-        </form>
+        </div>
       )}
     </section>
   );

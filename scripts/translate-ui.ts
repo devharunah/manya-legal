@@ -4,8 +4,11 @@
  *
  *   node --env-file=.env.local node_modules/jiti/lib/jiti-cli.mjs scripts/translate-ui.ts
  *
- * A string whose numbers or {n} placeholder don't survive is kept in English
- * and listed, so nothing silently breaks. The output is machine translation:
+ * Existing translations are kept; only keys missing from lug.ts are sent to
+ * Sunbird (pass --all to redo everything). To refresh a string whose English
+ * changed, delete its line from lug.ts first. A string whose numbers or {n}
+ * placeholder don't survive is left out (shown in English) and listed, so
+ * nothing silently breaks, and a Sunbird outage never wipes good strings. The output is machine translation:
  * have a Luganda speaker review it, then edit lug.ts by hand if needed.
  */
 import { writeFileSync } from "node:fs";
@@ -13,15 +16,18 @@ import { resolve } from "node:path";
 
 import { requireEnv } from "../src/lib/env";
 import { type MessageKey, en } from "../src/lib/i18n/en";
+import { lug as existing } from "../src/lib/i18n/lug";
 import { keepsNumbers } from "../src/lib/text/numbers";
 import { createSunbird } from "../src/lib/voice/sunbird";
 
-const CONCURRENCY = 6;
+const CONCURRENCY = 3;
 
 async function main() {
   const sunbird = createSunbird({ apiKey: requireEnv("SUNBIRD_API_KEY"), voice: "Namuli" });
-  const keys = Object.keys(en) as MessageKey[];
-  const out: Partial<Record<MessageKey, string>> = {};
+  const all = Object.keys(en) as MessageKey[];
+  const redo = process.argv.includes("--all");
+  const out: Partial<Record<MessageKey, string>> = redo ? {} : { ...existing };
+  const keys = all.filter((k) => out[k] === undefined);
   const kept: MessageKey[] = [];
 
   let next = 0;
@@ -51,7 +57,7 @@ async function main() {
   await Promise.all(Array.from({ length: CONCURRENCY }, worker));
 
   // Failed or unsafe translations are left out, so they show in English.
-  const body = keys
+  const body = all
     .filter((k) => out[k] !== undefined)
     .map((k) => `  ${JSON.stringify(k)}: ${JSON.stringify(out[k])},`)
     .join("\n");
@@ -68,7 +74,9 @@ ${body}
 };
 `;
   writeFileSync(resolve("src/lib/i18n/lug.ts"), file);
-  console.info(`Wrote ${keys.length} strings, ${kept.length} left in English.`);
+  console.info(
+    `Translated ${keys.length - kept.length} of ${keys.length} missing strings; ${kept.length} left in English.`,
+  );
   for (const k of kept) console.info(`  left in English: ${k}`);
 }
 
