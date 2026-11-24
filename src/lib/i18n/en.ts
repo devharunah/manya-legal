@@ -275,6 +275,40 @@ export const en = {
   "pathway.arbitration.title": "Arbitration",
   "pathway.small_claims.title": "Small Claims Procedure",
   "pathway.legal_referral.title": "Get legal advice",
+  "pathway.negotiation.why":
+    "The law says a seller must deliver the goods the buyer paid for. Many disputes end when the supplier is reminded of this in writing.",
+  "pathway.negotiation.steps":
+    "Contact the supplier in writing (WhatsApp or a letter). Say what you paid, when, and ask for delivery or a refund by a clear date. Keep a copy of everything.",
+  "pathway.mediation.why":
+    "A neutral mediator helps both sides reach their own settlement. Nobody is forced to accept an outcome.",
+  "pathway.mediation.steps":
+    "Legal aid services such as Justice Centres Uganda and the Uganda Law Society offer mediation. If a case is filed in court, both sides can agree to court-annexed mediation, where the mediator charges no fee.",
+  "pathway.arbitration.why":
+    "You said your agreement sends disputes to arbitration. An arbitration agreement only counts if it is in writing, including in messages that keep a record.",
+  "pathway.arbitration.verbal":
+    "Your agreement was made verbally, so check whether the arbitration clause was ever written down.",
+  "pathway.arbitration.steps":
+    "Find the clause and follow it. If the parties can't agree on an arbitrator, CADR, now a department of the Ministry of Justice, deals with appointments.",
+  "pathway.small_claims.within":
+    "Your claim of {n} is within the UGX 10,000,000 small claims limit, and claims about the supply of goods are covered. The amount is not the only condition.",
+  "pathway.small_claims.over":
+    "Your claim of {n} is above the UGX 10,000,000 small claims limit, and a claim can't be split to fit under it. Ask a lawyer about the right court.",
+  "pathway.small_claims.whyUnknownAmount":
+    "Small claims cover claims up to UGX 10,000,000. Add the amount to your report to check.",
+  "pathway.small_claims.whyCurrency":
+    "The small claims limit is in Uganda shillings and you paid in {n}, so the value needs to be converted and checked.",
+  "pathway.small_claims.delivery":
+    "You asked for delivery. Small claims don't cover a claim for delivery alone without an alternative claim for money.",
+  "pathway.small_claims.conditions":
+    "Other conditions apply: only an individual (not a company) can bring the claim, and some kinds of dispute are excluded.",
+  "pathway.small_claims.steps":
+    "Before filing, give the supplier a written notice of demand and 14 days to pay. Attach your agreement, receipts and other proof to the claim.",
+  "pathway.small_claims.advocates":
+    "Whether lawyers may appear in small claims hearings has been challenged in court. Check the current position with the court clerk.",
+  "pathway.legal_referral.why":
+    "The law lets a buyer take action against a seller who fails to deliver. A lawyer can assess your evidence and the best route. Free legal aid exists if you can't afford one.",
+  "pathway.legal_referral.steps":
+    "Contact a legal aid provider and share your dispute report, using a referral package you control.",
 
   "referral.title": "Prepare a referral package",
   "referral.body":

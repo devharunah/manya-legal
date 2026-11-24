@@ -14,7 +14,8 @@ export function prefillFromProfile(intake: Intake, profile: Profile): Intake {
   ];
   const values = { ...intake.values };
   for (const [key, value] of from) {
-    if (value.trim() && !values[key]) values[key] = { value: value.trim(), source: "complainant", confirmed: false };
+    if (value.trim() && !values[key])
+      values[key] = { value: value.trim(), source: "complainant", confirmed: false };
   }
   return { ...intake, values };
 }

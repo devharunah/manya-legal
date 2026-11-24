@@ -33,8 +33,7 @@ function micError(error: unknown): MessageKey {
   if (name === "NotAllowedError" || name === "SecurityError") {
     return "mic.blocked";
   }
-  if (name === "NotFoundError")
-    return "mic.notFound";
+  if (name === "NotFoundError") return "mic.notFound";
   if (name === "NotSupportedError" || name === "NotReadableError") {
     return "mic.unsupported";
   }

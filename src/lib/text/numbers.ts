@@ -1,6 +1,5 @@
 /** Number checks shared by every translation and extraction step. */
 
-
 const NUMBER = /\d[\d,.]*(?:\(\d+\))*/g;
 const normalise = (n: string) => n.replace(/[.,]+$/, "").replace(/,/g, "");
 

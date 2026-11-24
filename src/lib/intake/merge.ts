@@ -90,7 +90,7 @@ export function editField(intake: Intake, key: FieldKey, raw: string): Intake {
   const unknown = intake.unknown.filter((k) => k !== key);
   if (trimmed === "") {
     const values = { ...intake.values };
-  delete values[key];
+    delete values[key];
     return { ...intake, values, unknown };
   }
   const spec = fieldSpec(key);

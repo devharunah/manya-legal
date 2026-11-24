@@ -13,8 +13,8 @@ import { resolve } from "node:path";
 
 import { requireEnv } from "../src/lib/env";
 import { type MessageKey, en } from "../src/lib/i18n/en";
-import { createSunbird } from "../src/lib/voice/sunbird";
 import { keepsNumbers } from "../src/lib/text/numbers";
+import { createSunbird } from "../src/lib/voice/sunbird";
 
 const CONCURRENCY = 6;
 
@@ -50,7 +50,11 @@ async function main() {
   }
   await Promise.all(Array.from({ length: CONCURRENCY }, worker));
 
-  const body = keys.map((k) => `  ${JSON.stringify(k)}: ${JSON.stringify(out[k])},`).join("\n");
+  // Failed or unsafe translations are left out, so they show in English.
+  const body = keys
+    .filter((k) => out[k] !== undefined)
+    .map((k) => `  ${JSON.stringify(k)}: ${JSON.stringify(out[k])},`)
+    .join("\n");
   const file = `import type { Messages } from "./en";
 
 /**

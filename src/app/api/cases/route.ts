@@ -15,7 +15,14 @@ export const POST = (req: Request) =>
     const profile = await store.getProfile();
     if (!profile) return fail("Register your business first.", 409);
     const created = await store.createCase(parsed.data.language);
-    const record = await store.updateCase(created.id, { intake: prefillFromProfile(created.intake, profile) });
-    await store.audit({ action: "case.create", resourceType: "case", resourceId: record.id, caseId: record.id });
+    const record = await store.updateCase(created.id, {
+      intake: prefillFromProfile(created.intake, profile),
+    });
+    await store.audit({
+      action: "case.create",
+      resourceType: "case",
+      resourceId: record.id,
+      caseId: record.id,
+    });
     return json({ case: record }, 201);
   });

@@ -3,7 +3,7 @@ import { expect, test } from "@playwright/test";
 import { en } from "../src/lib/i18n/en";
 import { MOCK_ENGLISH, MOCK_TRANSCRIPT } from "../src/lib/voice/mock";
 
-import { register, say, startCase } from "./helpers";
+import { label, register, say, startCase } from "./helpers";
 
 // The recorder needs a real (fake-device) microphone, which the headless shell lacks.
 test.use({
@@ -75,15 +75,18 @@ test("a Luganda voice note is transcribed, checked, and kept with its English re
   page,
 }) => {
   await register(page, { language: "Oluganda" });
-  await startCase(page);
-  const mic = page.getByRole("button", { name: en["mic.record"] });
-  await mic.click();
-  await page.getByRole("button", { name: en["mic.stop"] }).click();
-  await expect(page.getByLabel(en["intake.label"])).toHaveValue(MOCK_TRANSCRIPT);
-  await page.getByRole("button", { name: en["intake.send"] }).click();
+  await startCase(page, "lug");
+  await page.getByRole("button", { name: label("lug", "mic.record") }).click();
+  await page.getByRole("button", { name: label("lug", "mic.stop") }).click();
+  await expect(page.getByLabel(label("lug", "intake.label"))).toHaveValue(MOCK_TRANSCRIPT);
+  await page.getByRole("button", { name: label("lug", "intake.send") }).click();
   const said = page.getByTestId("trader-message").first();
   await expect(said).toContainText(MOCK_TRANSCRIPT);
   await expect(said).toContainText(MOCK_ENGLISH);
+  // MANYA's next question shows in Luganda.
+  await expect(page.getByTestId("manya-message").last()).toHaveText(
+    label("lug", "q.respondent.name"),
+  );
 });
 
 test("one trader can't open another trader's case", async ({ page, browser }) => {

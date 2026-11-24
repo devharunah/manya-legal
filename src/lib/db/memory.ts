@@ -43,7 +43,10 @@ const db: Tables = globalForStore.__manyaMemory;
 
 const now = () => new Date().toISOString();
 function strip<T extends { ownerId: string }>(row: T): Omit<T, "ownerId"> {
-  return Object.fromEntries(Object.entries(row).filter(([k]) => k !== "ownerId")) as Omit<T, "ownerId">;
+  return Object.fromEntries(Object.entries(row).filter(([k]) => k !== "ownerId")) as Omit<
+    T,
+    "ownerId"
+  >;
 }
 
 export function createMemoryStore(userId: string): CaseStore {

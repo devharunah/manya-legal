@@ -18,10 +18,7 @@
     "verify": "pnpm lint && pnpm typecheck && pnpm test && pnpm e2e"
   },
   "pnpm": {
-    "onlyBuiltDependencies": [
-      "@biomejs/biome",
-      "unrs-resolver"
-    ]
+    "onlyBuiltDependencies": ["@biomejs/biome", "unrs-resolver"]
   },
   "dependencies": {
     "@ai-sdk/google": "^4.0.122",

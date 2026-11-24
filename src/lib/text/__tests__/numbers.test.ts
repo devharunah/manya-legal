@@ -43,4 +43,3 @@ describe("keepsNumbers", () => {
     expect(keepsNumbers("Under section 5 you must", "Mu kitundu kino olina")).toBe(false);
   });
 });
-
