@@ -53,6 +53,12 @@ test("PRD 13 test 1: report a non-delivery, confirm it and get the PDF", async (
   await goods.getByRole("button", { name: en["review.save"] }).click();
   await expect(goods).toContainText("50 bags of sugar");
 
+  // The AI summary streams in from the trader's own answers.
+  const summary = page.getByTestId("case-summary");
+  await summary.getByRole("button", { name: en["summary.create"] }).click();
+  await expect(summary).toContainText("You reported that you paid Kato Wholesalers UGX 2,000,000");
+  await expect(summary).toContainText(en["summary.notice"]);
+
   const generate = page.getByRole("button", { name: en["review.generate"] });
   await expect(generate).toBeDisabled();
   await page.getByLabel(en["review.confirm"]).check();
@@ -76,9 +82,17 @@ test("a Luganda voice note is transcribed, checked, and kept with its English re
 }) => {
   await register(page, { language: "Oluganda" });
   await startCase(page, "lug");
+  const box = page.getByLabel(label("lug", "intake.label"));
   await page.getByRole("button", { name: label("lug", "mic.record") }).click();
+  await expect(page.getByText(label("lug", "mic.listening")).first()).toBeVisible();
+  // Live transcription: the words appear in the box while still recording.
+  await expect(box).toHaveValue(MOCK_TRANSCRIPT, { timeout: 15_000 });
+  await expect(page.getByRole("button", { name: label("lug", "mic.stop") })).toBeVisible();
+  // The square stops listening and leaves the text to check.
   await page.getByRole("button", { name: label("lug", "mic.stop") }).click();
-  await expect(page.getByLabel(label("lug", "intake.label"))).toHaveValue(MOCK_TRANSCRIPT);
+  await expect(page.getByRole("button", { name: label("lug", "mic.record") })).toBeVisible();
+  await expect(box).toHaveValue(MOCK_TRANSCRIPT);
+  // The arrow sends it.
   await page.getByRole("button", { name: label("lug", "intake.send") }).click();
   const said = page.getByTestId("trader-message").first();
   await expect(said).toContainText(MOCK_TRANSCRIPT);

@@ -23,6 +23,7 @@
   "dependencies": {
     "@ai-sdk/google": "^4.0.122",
     "@ai-sdk/openai": "^4.0.121",
+    "@ai-sdk/react": "^4.0.186",
     "@pdf-lib/fontkit": "^1.1.1",
     "@supabase/ssr": "^0.12.7",
     "@supabase/supabase-js": "^2.119.2",
