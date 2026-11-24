@@ -20,6 +20,7 @@ export function CaseSummary({ caseId }: { caseId: string }) {
   const [lang] = useLanguage();
   const [luganda, setLuganda] = useState<string | null>(null);
   const [translating, setTranslating] = useState(false);
+  const [empty, setEmpty] = useState(false);
   const { completion, complete, isLoading, error, stop } = useCompletion({
     api: `/api/cases/${caseId}/summary`,
     streamProtocol: "text",
@@ -27,8 +28,13 @@ export function CaseSummary({ caseId }: { caseId: string }) {
 
   async function run() {
     setLuganda(null);
+    setEmpty(false);
     const english = await complete("");
-    if (!english || lang !== "lug") return;
+    if (!english?.trim()) {
+      setEmpty(true);
+      return;
+    }
+    if (lang !== "lug") return;
     setTranslating(true);
     try {
       setLuganda((await api<{ text: string }>("/api/translate", { body: { text: english } })).text);
@@ -100,7 +106,7 @@ export function CaseSummary({ caseId }: { caseId: string }) {
           {luganda}
         </p>
       )}
-      {error && (
+      {(error || empty) && (
         <p role="alert" className="mt-2 text-sm text-red-700">
           {t("summary.error")}
         </p>

@@ -50,3 +50,15 @@ export function modelChain(provider: Provider): string[] {
     .filter(Boolean);
   return [...new Set([primary, ...fallbacks])];
 }
+
+/**
+ * Every provider to try, active one first. The other provider is added as a
+ * last resort when its key is set, so one free tier running out (Gemini's is
+ * 20 requests a day per model) doesn't stop the app.
+ */
+export function providerChain(): Provider[] {
+  const active = activeProvider();
+  if (!active) return [];
+  const other: Provider = active === "google" ? "openai" : "google";
+  return process.env[KEY_VARS[other]] ? [active, other] : [active];
+}

@@ -1,4 +1,4 @@
-import { activeProvider, modelChain, modelId } from "../provider";
+import { activeProvider, modelChain, modelId, providerChain } from "../provider";
 
 const KEYS = [
   "AI_PROVIDER",
@@ -59,5 +59,31 @@ describe("activeProvider", () => {
 
   it("uses a single OpenAI model", () => {
     expect(modelChain("openai")).toEqual(["gpt-5.4-mini"]);
+  });
+});
+
+describe("providerChain", () => {
+  const saved = { ...process.env };
+  beforeEach(() => {
+    for (const k of KEYS) delete process.env[k];
+  });
+  afterAll(() => {
+    process.env = saved;
+  });
+
+  it("adds the other provider as a last resort when its key is set", () => {
+    process.env["GOOGLE_GENERATIVE_AI_API_KEY"] = "g";
+    process.env["OPENAI_API_KEY"] = "o";
+    process.env["AI_PROVIDER"] = "google";
+    expect(providerChain()).toEqual(["google", "openai"]);
+  });
+
+  it("uses only the configured provider when there is one key", () => {
+    process.env["OPENAI_API_KEY"] = "o";
+    expect(providerChain()).toEqual(["openai"]);
+  });
+
+  it("is empty with no keys", () => {
+    expect(providerChain()).toEqual([]);
   });
 });
