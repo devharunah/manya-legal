@@ -5,6 +5,8 @@ import Link from "next/link";
 import { type FormEvent, useEffect, useRef, useState } from "react";
 
 import type { Answer } from "@/lib/answer/types";
+import type { MessageKey } from "@/lib/i18n/en";
+import { lookup, useT } from "@/lib/i18n/use-t";
 import { DEMO_PROFILE } from "@/lib/profile";
 import { useLanguage } from "@/lib/use-language";
 import { useIsDemo, useProfile } from "@/lib/use-profile";
@@ -13,12 +15,7 @@ import { AnswerCard, type Translation } from "./answer-card";
 import { answerToLuganda, questionToEnglish } from "./voice/api";
 import { MicButton } from "./voice/mic-button";
 
-export const SUGGESTIONS = [
-  "What do I need to legally operate my retail shop in Kampala?",
-  "What could happen if I operate my shop without the required trading licence?",
-  "My trading licence is expiring. What should I do?",
-  "How much does a trading licence cost?",
-];
+const SUGGESTIONS = ["ask.suggest1", "ask.suggest2", "ask.suggest3", "ask.suggest4"] as const;
 
 interface Turn {
   id: number;
@@ -30,8 +27,6 @@ interface Turn {
   translation?: Translation;
   error?: string;
 }
-
-const failMessage = (e: unknown, fallback: string) => (e instanceof Error ? e.message : fallback);
 
 /** Asks our checked English pipeline. Returns the answer, or an error message for the trader. */
 async function fetchAnswer(
@@ -45,7 +40,7 @@ async function fetchAnswer(
   });
   return res.headers.get("content-type")?.includes("application/json")
     ? await res.json()
-    : { error: "The service is busy right now. Please try your question again in a moment." };
+    : { error: "busy" };
 }
 
 export function AskView({ voice = false }: { voice?: boolean }) {
@@ -57,6 +52,11 @@ export function AskView({ voice = false }: { voice?: boolean }) {
   const [voiceError, setVoiceError] = useState<string | null>(null);
   // Luganda needs the speech service for translation; without it, English only.
   const lang = voice ? storedLang : "en";
+  const t = useT();
+  // Server messages are in English: show them as they are in English, and our
+  // own translated message otherwise.
+  const say = (e: unknown, key: MessageKey) =>
+    lang === "en" && e instanceof Error && e.message ? e.message : t(key);
   const endRef = useRef<HTMLDivElement>(null);
   const nextId = useRef(0);
   const isDemo = useIsDemo();
@@ -72,7 +72,7 @@ export function AskView({ voice = false }: { voice?: boolean }) {
   }, [turnCount]);
 
   function update(id: number, patch: Partial<Turn>) {
-    setTurns((t) => t.map((turn) => (turn.id === id ? { ...turn, ...patch } : turn)));
+    setTurns((prev) => prev.map((turn) => (turn.id === id ? { ...turn, ...patch } : turn)));
   }
 
   /** Runs after the English answer is on screen, so the trader never waits on it. */
@@ -87,7 +87,7 @@ export function AskView({ voice = false }: { voice?: boolean }) {
       update(id, {
         translation: {
           status: "failed",
-          error: failMessage(e, "The Luganda version isn't available right now."),
+          error: say(e, "ask.errorTranslateAnswer"),
         },
       });
     }
@@ -99,7 +99,10 @@ export function AskView({ voice = false }: { voice?: boolean }) {
     nextId.current += 1;
     const id = nextId.current;
     const luganda = lang === "lug";
-    setTurns((t) => [...t, { id, question: q, stage: luganda ? "translating" : "answering" }]);
+    setTurns((prev) => [
+      ...prev,
+      { id, question: q, stage: luganda ? "translating" : "answering" },
+    ]);
     setInput("");
     setVoiceError(null);
     setBusy(true);
@@ -111,20 +114,21 @@ export function AskView({ voice = false }: { voice?: boolean }) {
         try {
           english = await questionToEnglish(q);
         } catch (e) {
-          update(id, { error: failMessage(e, "We couldn't translate your question.") });
+          update(id, { error: say(e, "ask.errorTranslateQuestion") });
           return;
         }
         update(id, { english, stage: "answering" });
       }
       const data = await fetchAnswer(english, profile);
       if ("error" in data) {
-        update(id, { error: data.error });
+        const message = data.error === "busy" ? t("ask.errorBusy") : data.error;
+        update(id, { error: lang === "en" ? message : t("ask.errorBusy") });
         return;
       }
       update(id, { answer: data });
       if (luganda) void translateAnswer(id, data);
     } catch {
-      update(id, { error: "We couldn't reach the server. Check your connection and try again." });
+      update(id, { error: t("ask.errorNetwork") });
     } finally {
       setBusy(false);
     }
@@ -142,25 +146,22 @@ export function AskView({ voice = false }: { voice?: boolean }) {
           <Store className="size-6" aria-hidden />
         </span>
         <h1 className="mt-5 font-display text-3xl font-semibold text-brand-900">
-          First, your business
+          {t("setup.title")}
         </h1>
-        <p className="mt-3 text-muted">
-          Answers depend on what you sell and where. Tell us in under a minute, or try the demo as a
-          Kikuubo retailer.
-        </p>
+        <p className="mt-3 text-muted">{t("setup.body")}</p>
         <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
           <Link
             href="/onboard"
             className="rounded-xl bg-brand-800 px-6 py-3 font-semibold text-white hover:bg-brand-700"
           >
-            Set up my business
+            {t("setup.start")}
           </Link>
           <button
             type="button"
             onClick={() => save(DEMO_PROFILE)}
             className="rounded-xl border border-line bg-white px-6 py-3 font-semibold text-brand-800 hover:bg-brand-50"
           >
-            Use the demo profile
+            {t("setup.demo")}
           </button>
         </div>
       </div>
@@ -174,16 +175,16 @@ export function AskView({ voice = false }: { voice?: boolean }) {
           <div className="flex items-start justify-between gap-2">
             <div>
               <p className="text-xs font-semibold uppercase tracking-wider text-muted">
-                Answering for
+                {t("ask.answeringFor")}
               </p>
               <p className="mt-1 font-semibold text-ink">
-                {profile?.businessName || profile?.category || "…"}
+                {profile?.businessName || (profile ? lookup(t, "profile", profile.category) : "…")}
               </p>
             </div>
             <Link
               href="/onboard"
               className="rounded-lg p-1.5 text-muted hover:bg-brand-50 hover:text-brand-800"
-              aria-label="Edit business profile"
+              aria-label={t("ask.editProfile")}
             >
               <Pencil className="size-4" />
             </Link>
@@ -193,18 +194,15 @@ export function AskView({ voice = false }: { voice?: boolean }) {
               <dd className="flex items-center gap-1.5">
                 <MapPin className="size-3.5" aria-hidden /> {profile.location}
               </dd>
-              <dd>{profile.category}</dd>
-              <dd>{profile.registration}</dd>
-              <dd>{profile.licence}</dd>
+              <dd>{lookup(t, "profile", profile.category)}</dd>
+              <dd>{lookup(t, "profile", profile.registration)}</dd>
+              <dd>{lookup(t, "profile", profile.licence)}</dd>
             </dl>
           )}
         </div>
         <div className="hidden rounded-2xl border border-line bg-white p-4 text-xs leading-5 text-muted shadow-sm lg:block">
-          <p className="font-semibold text-ink">What we cover today</p>
-          <p className="mt-1">
-            Trading licences, business registration (URSB), TIN and related compliance for small
-            traders, starting with Kampala. Other areas of law are coming.
-          </p>
+          <p className="font-semibold text-ink">{t("ask.coverTitle")}</p>
+          <p className="mt-1">{t("ask.coverBody")}</p>
         </div>
       </aside>
 
@@ -212,21 +210,19 @@ export function AskView({ voice = false }: { voice?: boolean }) {
         {turns.length === 0 ? (
           <div className="flex-1 pt-2 lg:pt-6">
             <h1 className="font-display text-3xl font-semibold tracking-tight text-brand-900 sm:text-4xl">
-              What would you like to know?
+              {t("ask.title")}
             </h1>
-            <p className="mt-2 text-muted">
-              Ask in your own words. Here are questions traders often have:
-            </p>
+            <p className="mt-2 text-muted">{t("ask.subtitle")}</p>
             <div className="mt-6 grid gap-3 sm:grid-cols-2">
               {SUGGESTIONS.map((s) => (
                 <button
                   key={s}
                   type="button"
-                  onClick={() => void ask(s)}
+                  onClick={() => void ask(t(s))}
                   disabled={!profile}
                   className="rounded-2xl border border-line bg-white p-4 text-left text-[15px] leading-6 text-ink shadow-sm transition hover:-translate-y-0.5 hover:border-brand-300 hover:shadow-md disabled:opacity-50"
                 >
-                  {s}
+                  {t(s)}
                 </button>
               ))}
             </div>
@@ -244,7 +240,7 @@ export function AskView({ voice = false }: { voice?: boolean }) {
                       className="max-w-[85%] text-right text-xs text-muted"
                       data-testid="understood"
                     >
-                      We searched our sources for: <em>{turn.english}</em>
+                      {t("ask.searchedFor")} <em>{turn.english}</em>
                     </p>
                   )}
                 </div>
@@ -266,8 +262,8 @@ export function AskView({ voice = false }: { voice?: boolean }) {
                       <span className="dot size-2 rounded-full bg-brand-500" />
                     </span>
                     {turn.stage === "translating"
-                      ? "Translating your question into English to search our sources…"
-                      : "Checking official sources and writing a plain answer…"}
+                      ? t("ask.translatingQuestion")
+                      : t("ask.checking")}
                   </div>
                 )}
               </div>
@@ -283,7 +279,7 @@ export function AskView({ voice = false }: { voice?: boolean }) {
           {voice && (
             <div className="mb-2 flex flex-wrap items-center justify-between gap-2 px-1">
               <fieldset className="inline-flex rounded-xl bg-brand-50 p-1 text-xs font-semibold">
-                <legend className="sr-only">Answer language</legend>
+                <legend className="sr-only">{t("nav.language")}</legend>
                 {(["en", "lug"] as const).map((l) => (
                   <button
                     key={l}
@@ -297,12 +293,12 @@ export function AskView({ voice = false }: { voice?: boolean }) {
                 ))}
               </fieldset>
               <span className="text-[11px] text-muted">
-                Tap the microphone to ask in Luganda (up to 30 seconds).
+                {t("ask.micHint")}
               </span>
             </div>
           )}
           <label htmlFor="question" className="sr-only">
-            Your question
+            {t("ask.questionLabel")}
           </label>
           <div className="flex items-end gap-2">
             {voice && (
@@ -327,7 +323,7 @@ export function AskView({ voice = false }: { voice?: boolean }) {
                   void ask(input);
                 }
               }}
-              placeholder="e.g. Can KCCA close my shop if my licence has expired?"
+              placeholder={t("ask.placeholder")}
               maxLength={500}
               className="max-h-40 min-h-12 flex-1 resize-none rounded-xl border border-line bg-white px-4 py-3 text-base outline-none focus:border-brand-400 focus:ring-4 focus:ring-brand-100 sm:border-0 sm:focus:ring-0"
             />
@@ -335,7 +331,7 @@ export function AskView({ voice = false }: { voice?: boolean }) {
               type="submit"
               disabled={busy || input.trim().length < 3 || !profile}
               className="grid size-12 shrink-0 place-items-center rounded-xl bg-brand-800 text-white transition hover:bg-brand-700 disabled:bg-brand-200"
-              aria-label="Ask"
+              aria-label={t("ask.send")}
             >
               <ArrowUp className="size-5" />
             </button>
@@ -346,10 +342,8 @@ export function AskView({ voice = false }: { voice?: boolean }) {
             </p>
           )}
           <p className="mt-2 px-1 text-[11px] text-muted">
-            Legal information, not legal advice. Don&apos;t share ID numbers or other personal
-            details.
-            {voice &&
-              " Voice notes and Luganda text are sent to Sunbird AI to transcribe and translate; Sunbird may keep a copy. We don't store them."}
+            {t("ask.disclaimer")}
+            {voice && ` ${t("ask.voiceNotice")}`}
           </p>
         </form>
       </section>

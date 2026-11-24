@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 
 import type { SpeechPiece } from "@/lib/answer/types";
 import { TARGET_RATE, encodeWav } from "@/lib/audio/wav";
+import { useT } from "@/lib/i18n/use-t";
 
 import { speak } from "./api";
 
@@ -53,6 +54,7 @@ let stopActive: (() => void) | null = null;
  * single audio element.
  */
 export function SpeakButton({ pieces, label }: { pieces: SpeechPiece[]; label: string }) {
+  const t = useT();
   const [state, setState] = useState<State>("idle");
   const [error, setError] = useState<string | null>(null);
   const run = useRef(0);
@@ -121,8 +123,8 @@ export function SpeakButton({ pieces, label }: { pieces: SpeechPiece[]; label: s
         await playOne(el, blob);
         if (run.current !== id) return;
       }
-    } catch (e) {
-      if (run.current === id) setError(e instanceof Error ? e.message : "Playback failed.");
+    } catch {
+      if (run.current === id) setError(t("speak.failed"));
     }
     if (run.current === id) {
       if (stopActive === stop) stopActive = null;
@@ -137,7 +139,7 @@ export function SpeakButton({ pieces, label }: { pieces: SpeechPiece[]; label: s
         type="button"
         onClick={() => void play()}
         className="inline-flex items-center gap-1.5 rounded-lg bg-brand-50 px-2.5 py-1 text-xs font-semibold text-brand-800 transition hover:bg-brand-100"
-        aria-label={state === "idle" ? label : `Stop: ${label}`}
+        aria-label={state === "idle" ? label : `${t("speak.stop")}: ${label}`}
         data-state={state}
       >
         {state === "loading" ? (
@@ -147,7 +149,7 @@ export function SpeakButton({ pieces, label }: { pieces: SpeechPiece[]; label: s
         ) : (
           <Volume2 className="size-3.5" aria-hidden />
         )}
-        {state === "loading" ? "Preparing audio…" : state === "playing" ? "Stop" : label}
+        {state === "loading" ? t("speak.preparing") : state === "playing" ? t("speak.stop") : label}
       </button>
       {error && (
         <span role="alert" className="text-xs text-red-700">

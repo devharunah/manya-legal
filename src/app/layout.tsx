@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Fraunces, Plus_Jakarta_Sans } from "next/font/google";
 
+import { HtmlLang } from "@/components/html-lang";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 
@@ -27,6 +28,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${jakarta.variable} ${fraunces.variable}`}>
       <body className="flex min-h-screen flex-col">
+        <HtmlLang />
         <SiteHeader />
         <div className="flex-1">{children}</div>
         <SiteFooter />

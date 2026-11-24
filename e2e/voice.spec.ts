@@ -1,5 +1,8 @@
 import { expect, test } from "@playwright/test";
 
+import { en } from "../src/lib/i18n/en";
+import { lug } from "../src/lib/i18n/lug";
+
 // Must match src/lib/voice/mock.ts (E2E_MOCK_VOICE is set by playwright.config.ts).
 const MOCK_TRANSCRIPT = "Layisinsi yange ey'okusuubula eggwaako. Nkole ki?";
 const MOCK_ENGLISH = "My trading licence is expiring. What should I do?";
@@ -35,38 +38,61 @@ test.describe("Luganda voice", () => {
       "true",
     );
 
-    await page.getByRole("button", { name: "Ask" }).click();
+    // Choosing Luganda switched the whole page, the ask button included.
+    await page.getByRole("button", { name: lug["ask.send"], exact: true }).click();
     await expect(page.getByTestId("understood")).toContainText(MOCK_ENGLISH);
 
     const card = page.getByTestId("answer-card");
     await expect(card).toBeVisible({ timeout: 20_000 });
-    await expect(card.getByRole("heading", { name: "Sources" })).toBeVisible();
-    await expect(card.getByText("Machine translation (Sunbird AI).")).toBeVisible({
-      timeout: 15_000,
-    });
+    await expect(card.getByRole("heading", { name: lug["answer.sources"], exact: true })).toBeVisible();
+    await expect(card.getByTestId("mt-notice")).toBeVisible({ timeout: 15_000 });
     await expect(card.getByText(/\[Oluganda\]/).first()).toBeVisible();
 
     // English is one tap away, and the original law is never translated.
-    await card.getByRole("button", { name: "English" }).click();
+    await card.getByRole("button", { name: "English", exact: true }).click();
     await expect(card.getByText(/\[Oluganda\]/)).toHaveCount(0);
-    await card.getByRole("button", { name: "Oluganda" }).click();
+    await card.getByRole("button", { name: "Oluganda", exact: true }).click();
 
-    const listen = card.getByRole("button", { name: "Wuliriza (listen)" });
+    const listen = card.getByRole("button", { name: lug["speak.listen"], exact: true });
     await listen.click();
     await expect(listen).toHaveAttribute("data-state", "idle", { timeout: 15_000 });
     await expect(card.getByRole("alert")).toHaveCount(0);
 
-    await card.getByRole("tab", { name: /Original law/ }).click();
-    await expect(card.getByText(/never machine-translate/)).toBeVisible();
+    await card.getByRole("tab", { name: lug["answer.tabLaw"] }).click();
+    await expect(card.getByText(lug["answer.lawNotTranslated"])).toBeVisible();
     await expect(card.locator("blockquote").first()).not.toContainText("[Oluganda]");
   });
 
   test("a question outside our sources is still refused in Luganda mode", async ({ page }) => {
     await page.goto("/ask?demo=1");
-    await page.getByRole("button", { name: "Oluganda" }).click();
-    await page.getByLabel("Your question").fill("How do I file for divorce?");
-    await page.getByRole("button", { name: "Ask" }).click();
-    await expect(page.getByText("Not covered by our sources")).toBeVisible({ timeout: 20_000 });
+    await page.getByRole("button", { name: "Oluganda", exact: true }).click();
+    await page.getByLabel(lug["ask.questionLabel"]).fill("How do I file for divorce?");
+    await page.getByRole("button", { name: lug["ask.send"], exact: true }).click();
+    await expect(page.getByText(lug["answer.notCovered"])).toBeVisible({ timeout: 20_000 });
+  });
+
+  test("switching to Luganda switches the whole page, and back", async ({ page }) => {
+    await page.goto("/ask?demo=1");
+    const nav = page.getByRole("navigation");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText(en["ask.title"]);
+
+    await page.getByRole("button", { name: "Oluganda", exact: true }).click();
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText(lug["ask.title"]);
+    await expect(nav.getByRole("link", { name: lug["nav.ask"] })).toBeVisible();
+    await expect(page.getByRole("button", { name: lug["ask.suggest3"] })).toBeVisible();
+    await expect(page.getByLabel(lug["ask.questionLabel"])).toHaveAttribute(
+      "placeholder",
+      lug["ask.placeholder"],
+    );
+    await expect(page.locator("html")).toHaveAttribute("lang", "lg");
+
+    // The choice is remembered on the next visit.
+    await page.reload();
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText(lug["ask.title"]);
+
+    await page.getByRole("button", { name: "English", exact: true }).click();
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText(en["ask.title"]);
+    await expect(page.locator("html")).toHaveAttribute("lang", "en");
   });
 });
 

@@ -4,6 +4,7 @@ import { ExternalLink, X } from "lucide-react";
 import { useEffect } from "react";
 
 import type { CitedSource } from "@/lib/answer/types";
+import { useT } from "@/lib/i18n/use-t";
 
 import { CurrencyBadge } from "./currency-badge";
 
@@ -16,6 +17,7 @@ export function SourceDrawer({
   index: number;
   onClose: () => void;
 }) {
+  const t = useT();
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
     window.addEventListener("keydown", onKey);
@@ -31,7 +33,7 @@ export function SourceDrawer({
     >
       <button
         type="button"
-        aria-label="Close source"
+        aria-label={t("drawer.close")}
         className="absolute inset-0 bg-brand-950/40 backdrop-blur-sm"
         onClick={onClose}
       />
@@ -39,7 +41,7 @@ export function SourceDrawer({
         <div className="sticky top-0 flex items-start justify-between gap-4 border-b border-line bg-white p-5">
           <div>
             <p className="text-xs font-semibold uppercase tracking-wider text-gold-600">
-              Source {index}
+              {t("drawer.source", { n: index })}
             </p>
             <h2
               id="source-title"
@@ -53,7 +55,7 @@ export function SourceDrawer({
             type="button"
             onClick={onClose}
             className="rounded-lg p-2 text-muted hover:bg-brand-50 hover:text-brand-800"
-            aria-label="Close"
+            aria-label={t("drawer.close")}
           >
             <X className="size-5" />
           </button>
@@ -62,7 +64,7 @@ export function SourceDrawer({
           <div className="flex flex-wrap gap-2">
             <CurrencyBadge currency={source.currency} />
             <span className="rounded-full bg-brand-50 px-2 py-0.5 text-[11px] font-semibold text-brand-700 ring-1 ring-brand-100 ring-inset">
-              {source.textKind === "verbatim" ? "Exact wording" : "Close summary of the document"}
+              {source.textKind === "verbatim" ? t("drawer.exact") : t("drawer.summary")}
             </span>
           </div>
           <div>
@@ -72,16 +74,16 @@ export function SourceDrawer({
             </blockquote>
           </div>
           <div className="rounded-xl bg-gold-50 p-4 text-sm leading-6 text-gold-700">
-            <p className="font-semibold">Is this still the law?</p>
+            <p className="font-semibold">{t("drawer.stillLaw")}</p>
             <p className="mt-1">{source.currencyNote}</p>
           </div>
           <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-sm">
-            <dt className="text-muted">Document</dt>
+            <dt className="text-muted">{t("drawer.document")}</dt>
             <dd className="text-ink">{source.sourceTitle}</dd>
-            <dt className="text-muted">Publisher</dt>
+            <dt className="text-muted">{t("drawer.publisher")}</dt>
             <dd className="text-ink">{source.publisher}</dd>
-            <dt className="text-muted">As at</dt>
-            <dd className="text-ink">{source.asOf ?? "Undated by publisher"}</dd>
+            <dt className="text-muted">{t("drawer.asAt")}</dt>
+            <dd className="text-ink">{source.asOf ?? t("drawer.undated")}</dd>
           </dl>
           <a
             href={source.url}
@@ -89,7 +91,7 @@ export function SourceDrawer({
             rel="noreferrer"
             className="inline-flex items-center gap-2 rounded-xl border border-brand-200 px-4 py-2.5 text-sm font-semibold text-brand-800 transition hover:bg-brand-50"
           >
-            Open the official document <ExternalLink className="size-4" aria-hidden />
+            {t("drawer.open")} <ExternalLink className="size-4" aria-hidden />
           </a>
         </div>
       </aside>
