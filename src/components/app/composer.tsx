@@ -17,7 +17,7 @@ function LevelBars({ level }: { level: number }) {
         <span
           // biome-ignore lint/suspicious/noArrayIndexKey: fixed decorative bars
           key={i}
-          className="w-1 rounded-full bg-danger transition-[height] duration-100"
+          className="w-[3px] rounded-full bg-brand-700 transition-[height] duration-100"
           style={{ height: `${Math.max(15, Math.min(100, level * w * 140))}%` }}
         />
       ))}
@@ -108,38 +108,42 @@ export function Composer({
 
   const canSend = !busy && !finishing && (recording || text.trim().length > 0);
 
+  const hasText = text.trim().length > 0;
+
   return (
     <div>
       <div
-        className={`rounded-2xl border bg-white shadow-sm transition focus-within:ring-2 ${
+        className={`rounded-xl bg-paper p-2 transition-[border-color,box-shadow,background-color] ${
           recording
-            ? "border-danger-line focus-within:ring-danger-bg"
-            : "border-line focus-within:border-brand-400 focus-within:ring-brand-100"
+            ? "border-2 border-brand-700 bg-brand-50"
+            : "border border-line-strong focus-within:border-brand-700 focus-within:shadow-[var(--focus-ring-input)]"
         }`}
       >
         {(recording || finishing) && (
           <div
-            className="flex items-center gap-2 border-b border-line/70 px-4 py-2 text-xs font-semibold"
+            className="flex items-center gap-2 px-2 pt-1 pb-2 text-[13px] font-medium"
             aria-live="polite"
           >
             {recording ? (
               <>
-                <span className="size-2 animate-pulse rounded-full bg-danger" aria-hidden />
-                <span className="text-danger">{t("mic.listening")}</span>
+                <span className="text-brand-700">{t("mic.listening")}</span>
+                <span className="font-mono text-brand-700 tabular-nums">
+                  {clock(recorder.seconds)}
+                </span>
                 <LevelBars level={recorder.level} />
-                <span className="ml-auto tabular-nums text-ink-3">
-                  {clock(recorder.seconds)} / {clock(MAX_SECONDS)}
+                <span className="ml-auto font-mono text-xs text-ink-3 tabular-nums">
+                  / {clock(MAX_SECONDS)}
                 </span>
               </>
             ) : (
               <>
                 <Loader2 className="size-3.5 animate-spin text-brand-700" aria-hidden />
-                <span className="text-brand-800">{t("mic.finishing")}</span>
+                <span className="text-brand-700">{t("mic.finishing")}</span>
               </>
             )}
           </div>
         )}
-        <div className="flex items-end gap-2 p-2">
+        <div className="flex items-end gap-2">
           <label htmlFor="intake-input" className="sr-only">
             {t("intake.label")}
           </label>
@@ -158,7 +162,7 @@ export function Composer({
                 void send();
               }
             }}
-            className="max-h-42 min-h-11 flex-1 resize-none bg-transparent px-2 py-2.5 text-base leading-6 text-ink outline-none placeholder:text-ink-3/70"
+            className="max-h-42 min-h-10 flex-1 resize-none bg-transparent px-2 py-2 text-base leading-6 text-ink outline-none placeholder:text-placeholder focus-visible:shadow-none"
           />
           <button
             type="button"
@@ -166,18 +170,18 @@ export function Composer({
             disabled={finishing || (busy && !recording)}
             aria-label={recording ? t("mic.stop") : t("mic.record")}
             data-state={recorder.state}
-            className={`grid size-11 shrink-0 place-items-center rounded-xl transition disabled:opacity-50 ${
+            className={`grid size-10 shrink-0 place-items-center rounded-full transition-colors disabled:opacity-50 ${
               recording
-                ? "bg-danger text-white hover:bg-danger-hover"
-                : "text-brand-800 hover:bg-brand-50"
+                ? "animate-manya-pulse bg-ink text-white"
+                : "bg-brand-50 text-brand-700 hover:bg-brand-100"
             }`}
           >
             {finishing ? (
               <Loader2 className="size-5 animate-spin" aria-hidden />
             ) : recording ? (
-              <Square className="size-4 fill-current" aria-hidden />
+              <Square className="size-3.5 fill-current" aria-hidden />
             ) : (
-              <Mic className="size-5" aria-hidden />
+              <Mic className="size-5" strokeWidth={1.9} aria-hidden />
             )}
           </button>
           <button
@@ -185,12 +189,14 @@ export function Composer({
             onClick={() => void send()}
             disabled={!canSend}
             aria-label={t("intake.send")}
-            className="grid size-11 shrink-0 place-items-center rounded-xl bg-brand-800 text-white shadow-sm transition hover:bg-brand-700 disabled:bg-brand-200"
+            className={`grid size-10 shrink-0 place-items-center rounded-full text-white transition-colors ${
+              hasText || recording ? "bg-ink hover:bg-ink-hover" : "bg-muted-fg"
+            } disabled:cursor-not-allowed`}
           >
             {busy ? (
               <Loader2 className="size-5 animate-spin" aria-hidden />
             ) : (
-              <ArrowUp className="size-5" aria-hidden />
+              <ArrowUp className="size-5" strokeWidth={2} aria-hidden />
             )}
           </button>
         </div>

@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { useRef, useState } from "react";
 
+import { Timeline } from "@/components/manya/blocks";
 import {
   type CaseRecord,
   DOCUMENT_CATEGORIES,
@@ -27,7 +28,7 @@ import { api } from "./client-api";
 import type { WorkspaceUpdate } from "./workspace-types";
 
 const input =
-  "mt-1 w-full rounded-lg border border-line bg-white px-3 py-2 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-200";
+  "mt-1.5 h-11 w-full rounded-md border border-line-strong bg-paper px-3 text-base font-normal text-ink outline-none transition-[border-color,box-shadow] focus:border-brand-700 focus:shadow-[var(--focus-ring-input)]";
 
 const FIELDS = [
   ["documentType", "doc.documentType", "text"],
@@ -43,7 +44,13 @@ const FIELDS = [
 export function UploadButton({
   caseId,
   onUploaded,
-}: { caseId: string | null; onUploaded: (d: EvidenceDocument) => void }) {
+  tile = false,
+}: {
+  caseId: string | null;
+  onUploaded: (d: EvidenceDocument) => void;
+  /** Show as the dashed "Add proof" tile instead of a button. */
+  tile?: boolean;
+}) {
   const t = useT();
   const ref = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
@@ -68,13 +75,26 @@ export function UploadButton({
 
   return (
     <div>
-      <label className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-brand-800 px-4 py-3 font-semibold text-white shadow-sm transition hover:bg-brand-700 has-[:disabled]:opacity-60">
+      <label
+        className={
+          tile
+            ? "flex min-h-32 cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-line-strong bg-paper p-5 text-center text-[15px] font-medium text-ink-2 transition-colors hover:border-brand-700 hover:text-brand-700 has-[:disabled]:opacity-60 has-[:focus-visible]:shadow-[var(--focus-ring)]"
+            : "inline-flex h-11 cursor-pointer items-center gap-2 rounded-md bg-brand-700 px-5 font-semibold text-white transition-colors hover:bg-brand-600 has-[:disabled]:opacity-60 has-[:focus-visible]:shadow-[var(--focus-ring)]"
+        }
+      >
         {busy ? (
-          <Loader2 className="size-4 animate-spin" aria-hidden />
+          <Loader2
+            className={tile ? "size-6 animate-spin text-brand-700" : "size-[18px] animate-spin"}
+            aria-hidden
+          />
         ) : (
-          <FileUp className="size-4" aria-hidden />
+          <FileUp
+            className={tile ? "size-6 text-brand-700" : "size-[18px]"}
+            strokeWidth={1.75}
+            aria-hidden
+          />
         )}
-        {busy ? t("evidence.uploading") : t("evidence.upload")}
+        {busy ? t("evidence.uploading") : tile ? t("evidence.addProof") : t("evidence.upload")}
         <input
           ref={ref}
           type="file"
@@ -100,19 +120,27 @@ export function UploadButton({
 function Flag({ flag }: { flag: ConsistencyFlag }) {
   const t = useT();
   return (
-    <div
-      data-testid="consistency-flag"
-      className="rounded-xl border border-gold-300 bg-gold-50 p-3 text-sm text-gold-700"
-    >
-      <p className="flex gap-2 font-semibold">
-        <AlertTriangle className="mt-0.5 size-4 shrink-0" aria-hidden />{" "}
-        {t(`consistency.${flag.kind}`)}
+    <div data-testid="consistency-flag" className="flex flex-col gap-2 text-sm">
+      <p className="flex items-center gap-2 font-semibold text-warning-text">
+        <AlertTriangle className="size-4 shrink-0" aria-hidden /> {t(`consistency.${flag.kind}`)}
       </p>
-      <p className="mt-1 pl-6">
-        {t("consistency.reportSays", { n: flag.reportValue })} ·{" "}
-        {t("consistency.documentSays", { n: flag.documentValue })}
-      </p>
-      <p className="mt-1 pl-6 text-xs">{t("consistency.note")}</p>
+      <div className="grid grid-cols-2 gap-2">
+        {(
+          [
+            ["consistency.reportLabel", flag.reportValue],
+            ["consistency.documentLabel", flag.documentValue],
+          ] as const
+        ).map(([label, value]) => (
+          <div
+            key={label}
+            className="rounded-md border border-warning-line bg-warning-bg-2 px-3 py-2.5"
+          >
+            <span className="block text-xs text-warning-text">{t(label)}</span>
+            <span className="font-display text-lg font-semibold break-words text-ink">{value}</span>
+          </div>
+        ))}
+      </div>
+      <p className="text-xs text-ink-2">{t("consistency.note")}</p>
     </div>
   );
 }
@@ -163,19 +191,16 @@ export function DocumentCard({
   }
 
   return (
-    <article
-      data-testid="evidence-card"
-      className="rounded-2xl border border-line bg-white p-4 shadow-sm"
-    >
+    <article data-testid="evidence-card" className="rounded-lg border border-line bg-paper p-5">
       <header className="flex flex-wrap items-start justify-between gap-2">
         <div className="min-w-0">
-          <p className="truncate font-semibold text-ink">{doc.filename}</p>
+          <p className="truncate font-display text-[17px] font-semibold text-ink">{doc.filename}</p>
           <p className="mt-0.5 flex flex-wrap gap-x-3 gap-y-1 text-xs text-ink-3">
             <span className="inline-flex items-center gap-1">
               <Fingerprint className="size-3" aria-hidden />{" "}
               {t("evidence.integrity", { n: doc.sha256.slice(0, 12) })}
             </span>
-            <span className="inline-flex items-center gap-1 text-gold-700">
+            <span className="inline-flex items-center gap-1 text-warning-text">
               <ShieldAlert className="size-3" aria-hidden /> {t("evidence.notVerified")}
             </span>
           </p>
@@ -184,14 +209,14 @@ export function DocumentCard({
           href={`/api/download?kind=document&id=${doc.id}`}
           target="_blank"
           rel="noreferrer noopener"
-          className="inline-flex items-center gap-1 text-sm font-semibold text-brand-700"
+          className="inline-flex h-9 items-center gap-1 rounded-md px-2 text-sm font-semibold text-brand-700 hover:bg-brand-50"
         >
           {t("evidence.open")} <ExternalLink className="size-3.5" aria-hidden />
         </a>
       </header>
 
       {flags.length > 0 && (
-        <div className="mt-3 space-y-2">
+        <div className="mt-4 space-y-3">
           {flags.map((f) => (
             <Flag key={f.kind} flag={f} />
           ))}
@@ -199,7 +224,7 @@ export function DocumentCard({
       )}
 
       <p
-        className={`mt-3 text-xs font-semibold ${doc.userConfirmed ? "text-success" : "text-gold-700"}`}
+        className={`mt-3 inline-flex rounded-full px-2 py-0.5 text-xs font-semibold ${doc.userConfirmed ? "bg-success-bg text-success" : "bg-warning-bg text-warning-text"}`}
       >
         {doc.userConfirmed ? (
           <span className="inline-flex items-center gap-1">
@@ -219,7 +244,7 @@ export function DocumentCard({
         className="mt-3 grid gap-3 sm:grid-cols-2"
         key={`${doc.id}-${doc.userConfirmed}`}
       >
-        <label className="text-xs font-semibold text-ink-3 sm:col-span-2">
+        <label className="text-sm font-medium text-ink sm:col-span-2">
           {t("evidence.category")}
           <select name="category" defaultValue={doc.category} className={input}>
             {DOCUMENT_CATEGORIES.map((c) => (
@@ -232,7 +257,7 @@ export function DocumentCard({
         {FIELDS.map(([name, label, type]) => {
           const value = e?.[name];
           return (
-            <label key={name} className="text-xs font-semibold text-ink-3">
+            <label key={name} className="text-sm font-medium text-ink">
               {t(label)}
               <input
                 name={name}
@@ -248,7 +273,7 @@ export function DocumentCard({
           <button
             type="submit"
             disabled={busy}
-            className="inline-flex items-center gap-2 rounded-lg bg-brand-800 px-4 py-2 text-sm font-semibold text-white disabled:opacity-60"
+            className="inline-flex h-11 items-center gap-2 rounded-md bg-brand-700 px-5 text-[15px] font-semibold text-white transition-colors hover:bg-brand-600 disabled:bg-disabled-bg disabled:text-disabled-fg"
           >
             {busy && <Loader2 className="size-4 animate-spin" aria-hidden />}{" "}
             {t("evidence.confirm")}
@@ -282,10 +307,8 @@ export function EvidencePanel({
 
   return (
     <section className="space-y-5">
-      <div className="rounded-3xl border border-line bg-white p-5 shadow-sm sm:p-6">
-        <h2 className="font-display text-2xl font-semibold text-brand-900">
-          {t("evidence.title")}
-        </h2>
+      <div className="rounded-lg border border-line bg-paper p-5 sm:p-6">
+        <h2 className="font-display text-[22px] font-semibold text-ink">{t("evidence.title")}</h2>
         <p className="mt-1 text-sm text-ink-3">{t("evidence.body")}</p>
         <div className="mt-4">
           <UploadButton
@@ -314,7 +337,7 @@ export function EvidencePanel({
       </div>
 
       {documents.length === 0 ? (
-        <p className="rounded-2xl border border-dashed border-line p-6 text-sm text-ink-3">
+        <p className="rounded-lg border-2 border-dashed border-line-strong bg-paper p-6 text-center text-sm text-ink-2">
           {t("evidence.empty")}
         </p>
       ) : (
@@ -329,18 +352,17 @@ export function EvidencePanel({
       )}
 
       {timeline.length > 0 && (
-        <div className="rounded-3xl border border-line bg-white p-5 shadow-sm">
-          <h3 className="font-semibold text-ink">{t("evidence.timeline")}</h3>
-          <ol className="mt-3 space-y-3 border-l-2 border-brand-100 pl-4">
-            {timeline.map((ev) => (
-              <li key={`${ev.date}-${ev.text}`} className="text-sm">
-                <span className="block text-xs font-semibold text-brand-700">
-                  {ev.date ? formatDate(ev.date) : t("evidence.undated")}
-                </span>
-                {ev.text}
-              </li>
-            ))}
-          </ol>
+        <div className="rounded-lg border border-line bg-paper p-5">
+          <h3 className="mb-4 font-display text-[17px] font-semibold text-ink">
+            {t("evidence.timeline")}
+          </h3>
+          <Timeline
+            items={timeline.map((ev, i) => ({
+              key: `${i}-${ev.date}-${ev.text}`,
+              date: ev.date ? formatDate(ev.date) : t("evidence.undated"),
+              text: ev.text,
+            }))}
+          />
         </div>
       )}
     </section>

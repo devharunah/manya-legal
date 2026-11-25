@@ -48,7 +48,9 @@ export function Timeline({
                 item.highlight ? "bg-brand-700" : "bg-line-strong",
               )}
             />
-            {i < items.length - 1 && <span className="absolute top-4 bottom-[-4px] w-px bg-line" />}
+            {i < items.length - 1 && (
+              <span className="absolute top-4 bottom-[-4px] left-1/2 w-px -translate-x-1/2 bg-line" />
+            )}
           </span>
           <span className="flex min-w-0 flex-col gap-0.5">
             <span

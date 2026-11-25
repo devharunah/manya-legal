@@ -32,7 +32,7 @@ test("PRD 13 tests 2 and 3: organise evidence, see options, and prepare a consen
   await reportReady(page);
 
   // ── Organise ──
-  await page.getByRole("tab", { name: en["case.tabOrganise"] }).click();
+  await page.getByRole("tab", { name: en["case.tabEvidence"] }).click();
   await page.locator('input[type="file"]').setInputFiles({
     name: "momo-receipt-1500000-2026-11-10.png",
     mimeType: "image/png",
