@@ -107,7 +107,7 @@ test("all four SAMPLE documents upload to the right case and are never called au
 }) => {
   await register(page);
   const first = await startCase(page);
-  await page.getByRole("tab", { name: en["case.tabOrganise"] }).click();
+  await page.getByRole("tab", { name: en["case.tabEvidence"] }).click();
   const files = [
     "SAMPLE_mobile_money_payment_confirmation.pdf",
     "SAMPLE_commercial_invoice.pdf",

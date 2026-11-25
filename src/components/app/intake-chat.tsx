@@ -1,8 +1,10 @@
 "use client";
 
-import { ClipboardCheck, Info, Loader2, Sparkles } from "lucide-react";
+import { ClipboardCheck, Info, Mic } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
+import { LogoMark } from "@/components/shell/logo";
+import { Button } from "@/components/ui/button";
 import type { CaseRecord, Message } from "@/lib/cases/types";
 import { suggestedAnswer } from "@/lib/demo/script";
 import { type MessageKey, en } from "@/lib/i18n/en";
@@ -14,9 +16,23 @@ import { api } from "./client-api";
 import { Composer } from "./composer";
 import type { WorkspaceUpdate } from "./workspace-types";
 
-function Bubble({ m }: { m: Message }) {
+/** MANYA's line: the mark tile, then text with no bubble (design: Chat message). */
+function ManyaLine({ children, testId }: { children: React.ReactNode; testId?: string }) {
+  return (
+    <li className="flex animate-manya-in gap-3">
+      <LogoMark tone="dark" />
+      <p
+        data-testid={testId}
+        className="max-w-[88%] pt-[3px] text-[15px] leading-[1.5] whitespace-pre-wrap text-ink"
+      >
+        {children}
+      </p>
+    </li>
+  );
+}
+
+function Line({ m }: { m: Message }) {
   const t = useT();
-  const mine = m.sender === "trader";
   // MANYA's lines are stored as keys (plus the fields they ask about), so they
   // show in whichever language is chosen now, listing only what is missing.
   const labels = decodeFields(m.field)
@@ -28,28 +44,49 @@ function Bubble({ m }: { m: Message }) {
         ? t(m.originalText as MessageKey, { n: labels })
         : m.originalText
       : m.originalText;
+
+  if (m.sender === "manya") return <ManyaLine testId="manya-message">{text}</ManyaLine>;
+
+  const voice = m.inputType === "voice";
   return (
-    <li className={`flex ${mine ? "justify-end" : "justify-start"}`}>
-      <div
-        data-testid={mine ? "trader-message" : "manya-message"}
-        className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-[15px] leading-6 shadow-sm ${
-          mine
-            ? "rounded-br-sm bg-brand-800 text-white"
-            : "rounded-bl-sm border border-line bg-white text-ink"
-        }`}
-      >
-        <p className="whitespace-pre-wrap">{text}</p>
-        {mine && m.processedText && (
-          <p className="mt-1.5 border-t border-white/20 pt-1.5 text-xs text-brand-100/80">
-            {t("intake.heardEnglish", { n: m.processedText })}
-          </p>
+    <li data-testid="trader-message" className="flex animate-manya-in flex-col items-end gap-1.5">
+      <div className="max-w-[80%] rounded-[16px_16px_4px_16px] bg-brand-700 px-3.5 py-2.5 text-[15px] leading-[1.5] text-white sm:max-w-[78%]">
+        {voice && (
+          <span className="mb-1 flex items-center gap-1.5 text-xs font-medium text-white/80">
+            <Mic className="size-3.5" aria-hidden /> {t("chat.voiceNote")}
+          </span>
         )}
+        <p className="whitespace-pre-wrap">{text}</p>
       </div>
+      {m.processedText && (
+        <p className="max-w-[420px] text-right text-[13px] text-ink-2">
+          {t("intake.heardEnglish", { n: m.processedText })}
+        </p>
+      )}
     </li>
   );
 }
 
-/** PRD 4.3: guided intake, one question at a time, with voice or text. */
+/** Three dots while MANYA reads the message. */
+function Typing() {
+  const t = useT();
+  return (
+    <li className="flex items-center gap-3">
+      <LogoMark tone="dark" />
+      <output aria-label={t("intake.thinking")} className="flex gap-1">
+        {[0, 1, 2].map((i) => (
+          <span
+            key={i}
+            className="size-[7px] animate-manya-dot rounded-full bg-ink-3"
+            style={{ animationDelay: `${i * 0.15}s` }}
+          />
+        ))}
+      </output>
+    </li>
+  );
+}
+
+/** PRD 4.3: guided intake, one question at a time, with voice or text (design: AI chat). */
 export function IntakeChat({
   record,
   messages,
@@ -64,7 +101,7 @@ export function IntakeChat({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [draft, setDraft] = useState<{ text: string; nonce: number }>();
-  const endRef = useRef<HTMLLIElement>(null);
+  const listRef = useRef<HTMLOListElement>(null);
 
   const lastManya = [...messages].reverse().find((m) => m.sender === "manya");
   const asking = lastManya?.field ? decodeFields(lastManya.field) : [];
@@ -77,11 +114,16 @@ export function IntakeChat({
     record.status === "draft" ||
     record.status === "collecting_information" ||
     record.status === "paused";
+  const step = stepNumber(record.intake);
 
+  // Follow new messages unless the trader has scrolled up to read.
   // biome-ignore lint/correctness/useExhaustiveDependencies: scroll whenever a message is added.
   useEffect(() => {
-    endRef.current?.scrollIntoView({ block: "nearest" });
-  }, [messages.length]);
+    const list = listRef.current;
+    if (!list) return;
+    const nearEnd = list.scrollHeight - list.scrollTop - list.clientHeight < 160;
+    if (nearEnd || busy) list.scrollTo({ top: list.scrollHeight });
+  }, [messages.length, busy]);
 
   async function post(body: unknown): Promise<boolean> {
     setBusy(true);
@@ -124,98 +166,101 @@ export function IntakeChat({
 
   return (
     <section
-      aria-label={t("case.tabReport")}
-      className="rounded-3xl border border-line bg-paper p-3 sm:p-5"
+      aria-label={t("chat.title")}
+      className="flex min-w-0 flex-col overflow-hidden rounded-lg border border-line bg-paper"
     >
       {open && (
-        <div className="mb-3 flex items-center gap-3 px-1" data-testid="intake-step">
-          <span className="text-xs font-semibold text-brand-800">
-            {t("intake.step", { n: stepNumber(record.intake) })}
+        <div
+          className="flex items-center gap-3 border-b border-line px-4 py-3 sm:px-6"
+          data-testid="intake-step"
+        >
+          <span className="text-xs font-semibold text-brand-700">
+            {t("intake.step", { n: step })}
           </span>
           <span className="flex flex-1 gap-1" aria-hidden>
             {[1, 2, 3, 4, 5, 6].map((n) => (
               <span
                 key={n}
-                className={`h-1.5 flex-1 rounded-full ${n <= stepNumber(record.intake) ? "bg-brand-600" : "bg-line"}`}
+                className={`h-1 flex-1 rounded-[2px] ${n <= step ? "bg-brand-700" : "bg-line"}`}
               />
             ))}
           </span>
         </div>
       )}
-      <ol className="max-h-[55vh] space-y-3 overflow-y-auto p-1" aria-live="polite">
-        <li className="flex justify-start">
-          <div className="max-w-[85%] rounded-2xl rounded-bl-sm border border-line bg-white px-4 py-2.5 text-[15px] leading-6 shadow-sm">
-            {t("intake.greeting")}
-          </div>
-        </li>
+      <ol
+        ref={listRef}
+        role="log"
+        aria-live="polite"
+        className="mx-auto flex max-h-[60vh] w-full max-w-[var(--chat-column)] flex-col gap-[22px] overflow-y-auto px-4 py-6 sm:px-6"
+      >
+        <ManyaLine>{t("intake.greeting")}</ManyaLine>
         {messages.map((m) => (
-          <Bubble key={m.id} m={m} />
+          <Line key={m.id} m={m} />
         ))}
-        {busy && (
-          <li className="flex items-center gap-2 text-sm text-ink-3">
-            <Loader2 className="size-4 animate-spin" aria-hidden /> {t("intake.thinking")}
-          </li>
-        )}
-        <li ref={endRef} aria-hidden />
+        {busy && <Typing />}
       </ol>
 
       {open && (
-        <div className="mt-3">
-          {suggestion && (
-            <button
-              type="button"
-              disabled={busy}
-              data-testid="demo-suggestion"
-              onClick={() => setDraft({ text: suggestion, nonce: Date.now() })}
-              className="mb-2 flex w-full items-start gap-2 rounded-xl border border-dashed border-gold-400 bg-gold-50 px-3 py-2 text-left text-sm text-ink transition hover:bg-gold-100 disabled:opacity-60"
-            >
-              <Sparkles className="mt-0.5 size-4 shrink-0 text-gold-600" aria-hidden />
+        <div className="border-t border-line px-4 pt-3 pb-4 sm:px-6">
+          <div className="mx-auto w-full max-w-[var(--chat-column)]">
+            {suggestion && (
+              <div className="mb-2.5 flex flex-col items-start gap-1">
+                <span className="text-xs font-medium text-ink-3">{t("demo.suggested")}</span>
+                <button
+                  type="button"
+                  disabled={busy}
+                  data-testid="demo-suggestion"
+                  onClick={() => setDraft({ text: suggestion, nonce: Date.now() })}
+                  className="max-w-full rounded-[18px] border border-brand-700 bg-paper px-3.5 py-2 text-left text-sm font-medium text-brand-700 transition-colors hover:bg-brand-50 disabled:opacity-60"
+                >
+                  <span className="line-clamp-2">{suggestion}</span>
+                </button>
+              </div>
+            )}
+            <Composer
+              {...(draft ? { draft } : {})}
+              busy={busy}
+              placeholder={messages.length === 0 ? t("intake.placeholder") : t("intake.answerHere")}
+              onSend={(text, inputType) => post({ text, inputType })}
+            />
+            <div className="mt-2.5 flex flex-wrap items-center gap-2">
+              {asking.length > 0 && (
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  disabled={busy}
+                  onClick={() => void post({ skip: true })}
+                >
+                  {t("intake.skip")}
+                </Button>
+              )}
+              {messages.length > 0 && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  disabled={busy}
+                  onClick={() => void review()}
+                  className="text-brand-700"
+                >
+                  <ClipboardCheck aria-hidden /> {t("intake.reviewNow")}
+                </Button>
+              )}
+            </div>
+            {error && (
+              <p role="alert" className="mt-2 text-sm text-danger">
+                {error}
+              </p>
+            )}
+            <p className="mt-3 flex gap-1.5 text-xs leading-5 text-ink-3">
+              <Info className="mt-0.5 size-3.5 shrink-0" aria-hidden />
               <span>
-                <span className="block text-xs font-semibold text-gold-700">
-                  {t("demo.suggested")}
-                </span>
-                <span className="line-clamp-2">{suggestion}</span>
+                {t("intake.micHint")} {t("intake.aiNotice")}{" "}
+                {lang === "lug" ? t("intake.voiceNotice") : ""}
               </span>
-            </button>
-          )}
-          <Composer
-            {...(draft ? { draft } : {})}
-            busy={busy}
-            placeholder={messages.length === 0 ? t("intake.placeholder") : t("intake.answerHere")}
-            onSend={(text, inputType) => post({ text, inputType })}
-          />
-          <div className="mt-2 flex flex-wrap items-center gap-2">
-            {asking.length > 0 && (
-              <button
-                type="button"
-                disabled={busy}
-                onClick={() => void post({ skip: true })}
-                className="rounded-lg border border-line bg-white px-3 py-1.5 text-sm font-medium text-ink-3 hover:text-brand-800"
-              >
-                {t("intake.skip")}
-              </button>
-            )}
-            {messages.length > 0 && (
-              <button
-                type="button"
-                disabled={busy}
-                onClick={() => void review()}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-brand-200 bg-brand-50 px-3 py-1.5 text-sm font-semibold text-brand-800"
-              >
-                <ClipboardCheck className="size-4" aria-hidden /> {t("intake.reviewNow")}
-              </button>
-            )}
-          </div>
-          {error && (
-            <p role="alert" className="mt-2 text-sm text-danger">
-              {error}
             </p>
-          )}
-          <p className="mt-3 flex gap-1.5 text-xs leading-5 text-ink-3">
-            <Info className="mt-0.5 size-3.5 shrink-0" aria-hidden />
-            {t("intake.micHint")} {t("intake.aiNotice")}{" "}
-            {lang === "lug" ? t("intake.voiceNotice") : ""}
-          </p>
+          </div>
         </div>
       )}
     </section>

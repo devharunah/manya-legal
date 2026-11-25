@@ -29,7 +29,7 @@ test("the live demo runs the chat to a report with one tap per question", async 
   await expect(page.getByText(en["review.generated"])).toBeVisible({ timeout: 30_000 });
 
   // Organise: the presenter uploads the SAMPLE files live.
-  await page.getByRole("tab", { name: en["case.tabOrganise"] }).click();
+  await page.getByRole("tab", { name: en["case.tabEvidence"] }).click();
   const files = [
     "SAMPLE_mobile_money_payment_confirmation.pdf",
     "SAMPLE_commercial_invoice.pdf",
@@ -51,6 +51,7 @@ test("the live demo runs the chat to a report with one tap per question", async 
   await page.goto("/");
   await page.getByRole("button", { name: en["demo.open"] }).click();
   await expect(page).toHaveURL(/\/cases\/[\w-]+$/, { timeout: 30_000 });
+  await page.getByRole("tab", { name: en["case.tabReport"] }).click();
   await expect(
     page.getByRole("link", { name: en["review.download"].replace("{n}", "1") }),
   ).toBeVisible();
