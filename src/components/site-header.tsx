@@ -1,7 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
+import { useSession } from "@/components/app/session";
 import { Logo } from "@/components/shell/logo";
 import { useT } from "@/lib/i18n/use-t";
 import { useLanguage } from "@/lib/use-language";
@@ -40,6 +42,22 @@ export function LanguageSwitch({ tone = "light" }: { tone?: "light" | "dark" }) 
   );
 }
 
+/** Shown only to visitors without a profile, and not on the sign-in page itself. */
+function SignInLink() {
+  const t = useT();
+  const pathname = usePathname();
+  const { state } = useSession();
+  if (state.status !== "ready" || state.profile !== null || pathname === "/login") return null;
+  return (
+    <Link
+      href="/login"
+      className="rounded-md px-2 py-1 text-sm font-semibold text-brand-700 hover:text-brand-900"
+    >
+      {t("auth.signInLink")}
+    </Link>
+  );
+}
+
 /** Header for the public pages (landing, registration). */
 export function SiteHeader() {
   const t = useT();
@@ -50,7 +68,10 @@ export function SiteHeader() {
           <Logo tone="dark" />
           <span className="hidden text-[13px] text-ink-3 sm:inline">{t("nav.tagline")}</span>
         </Link>
-        <LanguageSwitch />
+        <div className="flex items-center gap-3">
+          <SignInLink />
+          <LanguageSwitch />
+        </div>
       </div>
     </header>
   );
