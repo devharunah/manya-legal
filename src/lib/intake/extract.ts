@@ -82,7 +82,7 @@ export interface ExtractResult {
   extraction: Extraction;
   category: DisputeCategory | null;
   events?: { date: string | null; text: string }[];
-  by: "model" | "rules";
+  by: "model" | "rules" | "script";
 }
 
 const rulesOnly = () =>

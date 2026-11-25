@@ -35,15 +35,27 @@ export function Composer({
   busy,
   placeholder,
   onSend,
+  draft,
 }: {
   busy: boolean;
   placeholder: string;
   onSend: (text: string, inputType: "text" | "voice") => Promise<boolean>;
+  /** Text to put in the box (a tapped demo answer); a new nonce fills it again. */
+  draft?: { text: string; nonce: number };
 }) {
   const t = useT();
   const [lang] = useLanguage();
   const [text, setText] = useState("");
   const [usedVoice, setUsedVoice] = useState(false);
+  // A newly tapped demo answer replaces the box text (set during render, not in an effect).
+  const [shownDraft, setShownDraft] = useState(draft);
+  if (draft !== shownDraft) {
+    setShownDraft(draft);
+    if (draft) {
+      setText(draft.text);
+      setUsedVoice(false);
+    }
+  }
   // Text typed before the current recording; live words are added after it.
   const base = useRef("");
   const area = useRef<HTMLTextAreaElement>(null);

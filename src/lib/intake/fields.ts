@@ -251,6 +251,8 @@ export interface Intake {
   /** Added later; absent on older cases. */
   events?: TimelineEvent[];
   workflow?: Workflow;
+  /** A live stage-demo case: prepared answers are read without AI (src/lib/demo/script.ts). */
+  demo?: "live";
 }
 
 export const emptyIntake = (): Intake => ({

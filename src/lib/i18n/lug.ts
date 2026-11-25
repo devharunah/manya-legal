@@ -98,12 +98,8 @@ export const lug: Partial<Messages> = {
   "intake.skip": "Simanyi.",
   "intake.skipped": "Simanyi.",
   "intake.thinking": "MANYA asoma obubaka bwo…",
-  "intake.retry":
-    "Saasobola kuzuula ekyo bulungi mu ky’oyogera. Nkwegayirira okikube mu ngeri entuufu, nga 2,000,000 shilingi oba 10 Novemba 2026.",
   "intake.understood":
     "Ntegedde nti wasasula ebintu ebitannatuuka. Ka nkunganye obubaka obumu tusobole okutegeka ensonga yo.",
-  "intake.otherCategory":
-    "MANYA kati ategeka alipoota z'okulwanirira obutatuuka kwa bintu okuva mu basuubuzi. Nja kusigala nga nkwata ebyo by'ompa, naye obulagirizi buyinza obutakwatagana na mbeera yo.",
   "intake.done": "Webale. Nnina kyonna kye njagala. Bambi weekenneenye lipoota yo wansi.",
   "intake.reviewNow": "Ddamu okwekenneenya alipoota yange",
   "intake.voiceNotice":

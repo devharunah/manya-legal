@@ -44,6 +44,9 @@ export const en = {
   "demo.loading": "Loading the demo…",
   "demo.note": "Demo cases use a fictional trader and documents marked SAMPLE.",
   "demo.error": "We couldn't load the demo cases. Please try again.",
+  "demo.live": "Start live demo",
+  "demo.liveError": "We couldn't start the live demo. Please try again.",
+  "demo.suggested": "Demo answer: tap to fill",
 
   "register.title": "Welcome to MANYA",
   "register.body":
@@ -119,11 +122,11 @@ export const en = {
   "intake.skipped": "I don't know",
   "intake.thinking": "MANYA is reading your message…",
   "intake.retry":
-    "I couldn't find that clearly in your answer. Please say it exactly, for example 2,000,000 shillings or 10 November 2026.",
+    "Thanks. To keep your report accurate, please give that detail exactly, for example 2,000,000 shillings or 10 November 2026.",
   "intake.understood":
     "I understand that you paid for goods that have not been delivered. Let me collect some details so we can organise your case.",
   "intake.otherCategory":
-    "MANYA currently prepares reports for supplier non-delivery disputes. I'll still record what you tell me, but the guidance may not fit your situation.",
+    "Thank you, I've noted that. Let me collect some details so we can organise your case.",
   "intake.done": "Thank you. I have what I need. Please review your report below.",
   "intake.doneMissing":
     "Thank you. I have enough to prepare your report. A few details are still missing; they are marked below, and you can add them before confirming.",

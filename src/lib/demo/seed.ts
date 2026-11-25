@@ -150,7 +150,9 @@ export async function seedDemo(store: CaseStore): Promise<CaseRecord[]> {
   if (!(await store.getProfile())) await store.saveProfile(DEMO_PROFILE);
   const existing = await store.listCases();
   const has = (key: string) =>
-    existing.some((c) => c.intake.values["respondent.name"]?.value === key);
+    existing.some(
+      (c) => c.intake.demo !== "live" && c.intake.values["respondent.name"]?.value === key,
+    );
   const created: CaseRecord[] = [];
   // Oldest first, so the flagship case ends up at the top of the list.
   for (const demo of [...DEMO_CASES].reverse()) {

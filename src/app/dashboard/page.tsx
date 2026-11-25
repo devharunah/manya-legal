@@ -4,7 +4,7 @@ import { Archive, ChevronRight, Loader2, Store } from "lucide-react";
 import Link from "next/link";
 
 import { CaseList, NewCaseButton, useCases } from "@/components/app/case-list";
-import { DemoButton } from "@/components/app/demo-button";
+import { DemoButton, LiveDemoButton } from "@/components/app/demo-button";
 import { RequireProfile } from "@/components/app/session";
 import { useT } from "@/lib/i18n/use-t";
 
@@ -52,6 +52,7 @@ export default function DashboardPage() {
                     label="demo.load"
                     className="inline-flex items-center gap-2 rounded-xl border border-white/25 px-4 py-3 font-semibold text-white transition hover:bg-white/10 disabled:opacity-60"
                   />
+                  <LiveDemoButton className="inline-flex items-center gap-2 rounded-xl border border-white/25 px-4 py-3 font-semibold text-white transition hover:bg-white/10 disabled:opacity-60" />
                 </div>
               </section>
               <Cases />

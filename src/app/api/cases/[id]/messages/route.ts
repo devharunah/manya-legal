@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { fail, json, withStore } from "@/lib/api";
+import { scriptedExtract } from "@/lib/demo/script";
 import { enT } from "@/lib/i18n/translate";
 import { type TraderInput, TranslationError, intakeTurn } from "@/lib/intake/engine";
 import { extractFields } from "@/lib/intake/extract";
@@ -36,7 +37,10 @@ export const POST = (req: Request, ctx: RouteContext<"/api/cases/[id]/messages">
 
     try {
       const result = await intakeTurn(store, record, input, {
-        extract: extractFields,
+        // Live demo cases read the prepared answers without AI; anything else is read as usual.
+        extract: async (english, context) =>
+          (record.intake.demo === "live" && scriptedExtract(english)) ||
+          extractFields(english, context),
         toEnglish: (text) => getVoiceProvider().translate(text, "eng", "lug"),
         questionText: (key) => enT(key as Parameters<typeof enT>[0]),
       });

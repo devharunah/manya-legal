@@ -14,7 +14,9 @@ export async function POST() {
     const store = await startSession();
     const created = await seedDemo(store);
     const flagship = (await store.listCases()).find(
-      (c) => c.intake.values["respondent.name"]?.value === DEMO_CASES[0]?.key,
+      (c) =>
+        c.intake.demo !== "live" &&
+        c.intake.values["respondent.name"]?.value === DEMO_CASES[0]?.key,
     );
     return json(
       {
