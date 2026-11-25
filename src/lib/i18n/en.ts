@@ -18,6 +18,13 @@ export const en = {
   "nav.profile": "Profile",
   "nav.language": "Language",
   "nav.menu": "Main menu",
+  "shell.newCase": "New case",
+  "shell.vaultShort": "Vault",
+  "shell.notAdvice": "Legal information, not legal advice.",
+  "stage.label": "Case progress",
+  "stage.steps": "Report steps",
+  "stage.done": "done",
+  "demo.sampleTag": "Sample",
 
   "footer.notAdvice": "Preliminary legal information and dispute preparation, not legal advice.",
   "footer.body":

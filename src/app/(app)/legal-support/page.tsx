@@ -11,11 +11,11 @@ import { useT } from "@/lib/i18n/use-t";
 export default function LegalSupportPage() {
   const t = useT();
   return (
-    <main className="mx-auto max-w-3xl space-y-8 px-4 py-8 sm:px-6">
+    <div className="mx-auto w-full max-w-3xl space-y-8">
       <div>
         <h1 className="font-display text-3xl font-semibold text-brand-900">{t("support.title")}</h1>
-        <p className="mt-2 text-muted">{t("support.body")}</p>
-        <p className="mt-1 text-sm text-muted">{t("support.noPractitioners")}</p>
+        <p className="mt-2 text-ink-3">{t("support.body")}</p>
+        <p className="mt-1 text-sm text-ink-3">{t("support.noPractitioners")}</p>
       </div>
       <div className="space-y-3">
         {PROVIDERS.map((p) => (
@@ -37,8 +37,8 @@ export default function LegalSupportPage() {
                 <h3 className="font-semibold text-ink">{s.shortTitle}</h3>
                 <CurrencyBadge currency={s.currency} />
               </div>
-              <p className="mt-1 text-sm text-muted">{s.title}</p>
-              <p className="mt-1 text-xs text-muted">
+              <p className="mt-1 text-sm text-ink-3">{s.title}</p>
+              <p className="mt-1 text-xs text-ink-3">
                 {s.publisher} · {t("drawer.asAt")}: {s.asOf ?? t("drawer.undated")} ·{" "}
                 {s.currencyNote}
               </p>
@@ -54,6 +54,6 @@ export default function LegalSupportPage() {
           ))}
         </ul>
       </section>
-    </main>
+    </div>
   );
 }

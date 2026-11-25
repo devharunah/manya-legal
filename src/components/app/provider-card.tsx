@@ -13,7 +13,7 @@ export function ProviderStatusBadge({ status }: { status: Provider["status"] }) 
     <span
       className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold ring-1 ring-inset ${
         verified
-          ? "bg-emerald-50 text-emerald-800 ring-emerald-200"
+          ? "bg-success-bg text-success ring-success-bg"
           : "bg-gold-50 text-gold-700 ring-gold-200"
       }`}
     >
@@ -44,21 +44,21 @@ export function ProviderCard({
         </h3>
         <ProviderStatusBadge status={provider.status} />
       </div>
-      <p className="mt-1 text-sm text-muted">
+      <p className="mt-1 text-sm text-ink-3">
         <span className="font-semibold">{t("provider.areas")}:</span> {provider.areas.join(", ")}
       </p>
       {!compact && (
         <>
-          <p className="mt-2 text-xs text-muted" lang="en">
+          <p className="mt-2 text-xs text-ink-3" lang="en">
             {provider.accreditation}
           </p>
           <p className="mt-2 text-sm text-ink">
             <span className="font-semibold">{t("provider.contact")}:</span> {provider.contact}
           </p>
-          <p className="text-sm text-muted">{provider.location}</p>
+          <p className="text-sm text-ink-3">{provider.location}</p>
         </>
       )}
-      <p className="mt-2 text-xs text-muted">
+      <p className="mt-2 text-xs text-ink-3">
         {t("provider.source")}: {provider.verificationSource}.{" "}
         {t("provider.lastChecked", { n: formatDate(provider.lastVerified) })}
       </p>

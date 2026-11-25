@@ -61,7 +61,7 @@ export default function Home() {
                 <span className="text-xs font-bold tracking-[0.2em] text-gold-600">0{i + 1}</span>
               </span>
               <h2 className="mt-4 font-display text-xl font-semibold text-brand-900">{t(title)}</h2>
-              <p className="mt-2 text-sm leading-6 text-muted">{t(body)}</p>
+              <p className="mt-2 text-sm leading-6 text-ink-3">{t(body)}</p>
             </li>
           ))}
         </ol>

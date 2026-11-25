@@ -73,7 +73,7 @@ export function RequireProfile({ children }: { children: (profile: Profile) => R
   if (state.status === "error") {
     return (
       <div className="mx-auto max-w-md px-4 py-16 text-center">
-        <p className="text-sm text-red-700">{state.message}</p>
+        <p className="text-sm text-danger">{state.message}</p>
         <button
           type="button"
           onClick={reload}
@@ -86,7 +86,7 @@ export function RequireProfile({ children }: { children: (profile: Profile) => R
   }
   if (state.status === "loading" || !state.profile) {
     return (
-      <output className="grid place-items-center py-24 text-muted">
+      <output className="grid place-items-center py-24 text-ink-3">
         <Loader2 className="size-6 animate-spin" aria-hidden />
         <span className="sr-only">{t("common.loading")}</span>
       </output>

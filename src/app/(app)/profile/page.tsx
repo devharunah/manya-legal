@@ -10,7 +10,7 @@ export default function ProfilePage() {
   const t = useT();
   const [saved, setSaved] = useState(false);
   return (
-    <main className="mx-auto max-w-lg px-4 py-10">
+    <div className="mx-auto w-full max-w-lg">
       <h1 className="font-display text-3xl font-semibold text-brand-900">{t("profile.title")}</h1>
       <div className="mt-8">
         <RequireProfile>
@@ -23,11 +23,11 @@ export default function ProfilePage() {
           )}
         </RequireProfile>
         {saved && (
-          <output className="mt-4 block text-sm font-medium text-emerald-700">
+          <output className="mt-4 block text-sm font-medium text-success">
             {t("profile.saved")}
           </output>
         )}
       </div>
-    </main>
+    </div>
   );
 }

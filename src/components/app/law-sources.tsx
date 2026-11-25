@@ -20,7 +20,7 @@ export function LawSources({ chunkIds }: { chunkIds: string[] }) {
         <BookOpenCheck className="size-4" aria-hidden /> {t("resolve.sources")} ({chunks.length})
       </summary>
       <div className="space-y-4 border-t border-line px-4 py-4">
-        <p className="text-xs text-muted">{t("resolve.lawNotTranslated")}</p>
+        <p className="text-xs text-ink-3">{t("resolve.lawNotTranslated")}</p>
         {chunks.map((chunk) => {
           const source = SOURCES.find((s) => s.id === chunk.sourceId);
           if (!source) return null;
@@ -34,7 +34,7 @@ export function LawSources({ chunkIds }: { chunkIds: string[] }) {
               <blockquote className="mt-1.5 border-l-2 border-gold-300 pl-3 text-sm leading-6 text-ink">
                 {chunk.text}
               </blockquote>
-              <p className="mt-1 text-xs text-muted">{chunk.currencyNote ?? source.currencyNote}</p>
+              <p className="mt-1 text-xs text-ink-3">{chunk.currencyNote ?? source.currencyNote}</p>
               <a
                 href={source.url}
                 target="_blank"

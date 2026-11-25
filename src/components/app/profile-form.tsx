@@ -89,7 +89,7 @@ export function ProfileForm({
           className={input}
           aria-describedby="phone-hint"
         />
-        <p id="phone-hint" className="mt-1 text-xs text-muted">
+        <p id="phone-hint" className="mt-1 text-xs text-ink-3">
           {t("register.phoneHint")}
         </p>
       </div>
@@ -166,7 +166,7 @@ export function ProfileForm({
         {t("register.privacy")}
       </p>
       {error && (
-        <p role="alert" className="text-sm text-red-700">
+        <p role="alert" className="text-sm text-danger">
           {error}
         </p>
       )}

@@ -50,7 +50,7 @@ export function DemoButton({
         {busy ? t("demo.loading") : t(label)}
       </button>
       {error && (
-        <p role="alert" className="mt-2 text-sm text-red-300">
+        <p role="alert" className="mt-2 text-sm text-danger-line">
           {t("demo.error")}
         </p>
       )}
@@ -93,7 +93,7 @@ export function LiveDemoButton({ className }: { className: string }) {
         {busy ? t("demo.loading") : t("demo.live")}
       </button>
       {error && (
-        <p role="alert" className="mt-2 text-sm text-red-300">
+        <p role="alert" className="mt-2 text-sm text-danger-line">
           {t("demo.liveError")}
         </p>
       )}

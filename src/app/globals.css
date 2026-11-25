@@ -1,39 +1,212 @@
 @import "tailwindcss";
 
-@theme {
-  --font-sans: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
-  --font-display: var(--font-fraunces), ui-serif, Georgia, serif;
-
-  /* Justice purple and gold, after the JLOS Justice Week identity. */
-  --color-brand-50: #f7f1fa;
-  --color-brand-100: #eedff4;
-  --color-brand-200: #dcbfe8;
-  --color-brand-300: #c194d6;
-  --color-brand-400: #a066be;
-  --color-brand-500: #8444a3;
-  --color-brand-600: #6d3389;
-  --color-brand-700: #5a2871;
-  --color-brand-800: #47205a;
-  --color-brand-900: #2e1239;
-  --color-brand-950: #1e0a26;
-
-  --color-gold-50: #fdf8eb;
-  --color-gold-100: #f9edc8;
-  --color-gold-200: #f2d98d;
-  --color-gold-300: #e9c053;
-  --color-gold-400: #dea92f;
-  --color-gold-500: #c88b1a;
-  --color-gold-600: #a86a13;
-  --color-gold-700: #864f14;
-
-  --color-ink: #1d1626;
-  --color-muted: #6b6274;
-  --color-paper: #fbf9fc;
-  --color-line: #ebe4ef;
-}
+/* ==========================================================================
+   MANYA design tokens: Direction B "Guided Workspace" (approved 2026-11-25).
+   Source: manya-design/design-system/design-tokens.css. This is the only
+   place design values live; components use the utilities below, never hex.
+   Purple, white and black only. No dark mode.
+   ========================================================================== */
 
 :root {
   color-scheme: light;
+
+  /* Brand scale */
+  --brand-950: #1e0b33;
+  --brand-900: #2b1248; /* sidebar / hero ground */
+  --brand-700: #4c1d80; /* primary action */
+  --brand-600: #5e2a9c; /* primary hover */
+  --brand-500: #7440bf; /* focus ring */
+  --brand-100: #eee6f8; /* tinted chip / avatar */
+  --brand-50: #f6f1fc; /* next-step band, selected option bg */
+
+  /* Neutrals */
+  --ink: #141118;
+  --ink-2: #4a4452;
+  --ink-3: #6b6474;
+  --ink-hover: #2e2a33; /* ink button hover */
+  --line-strong: #d3ccdc;
+  --line: #e7e3ec;
+  --tint: #f1eef4;
+  --canvas: #f8f6fa;
+  --paper: #ffffff;
+  --muted-fg: #b9b2c2; /* empty send button, disabled secondary text */
+  --disabled-bg: #e7e3ec;
+  --disabled-fg: #6b6474;
+  --placeholder: #6b6474;
+
+  /* Status (always paired with a word or icon) */
+  --success: #157347;
+  --success-bg: #e8f5ee;
+  --success-on-dark: #9fe0bd;
+  --warning: #9a5b00;
+  --warning-text: #7a4a00;
+  --warning-bg: #fff1d6;
+  --warning-bg-2: #fff8ec;
+  --warning-line: #f0d9b5;
+  --danger: #b42318;
+  --danger-hover: #921c13;
+  --danger-active: #7a170f;
+  --danger-bg: #fdecea;
+  --danger-line: #f3c7c2;
+
+  /* shadcn/ui semantic variables */
+  --background: var(--canvas);
+  --foreground: var(--ink);
+  --card: var(--paper);
+  --card-foreground: var(--ink);
+  --popover: var(--paper);
+  --popover-foreground: var(--ink);
+  --primary: var(--brand-700);
+  --primary-foreground: #ffffff;
+  --secondary: var(--paper);
+  --secondary-foreground: var(--ink);
+  --muted: var(--tint);
+  --muted-foreground: var(--ink-3);
+  --accent: var(--brand-50);
+  --accent-foreground: var(--brand-700);
+  --destructive: var(--danger);
+  --destructive-foreground: #ffffff;
+  --border: var(--line);
+  --input: var(--line-strong);
+  --ring: var(--brand-500);
+  --radius: 0.625rem;
+
+  --sidebar: var(--brand-900);
+  --sidebar-foreground: rgba(255, 255, 255, 0.78);
+  --sidebar-primary: #ffffff;
+  --sidebar-primary-foreground: var(--brand-900);
+  --sidebar-accent: rgba(255, 255, 255, 0.14);
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-hover: rgba(255, 255, 255, 0.07);
+  --sidebar-pill: rgba(255, 255, 255, 0.16);
+  --sidebar-track: rgba(255, 255, 255, 0.1);
+  --sidebar-border: rgba(255, 255, 255, 0.12);
+  --sidebar-ring: var(--brand-500);
+
+  /* Typography: families come from next/font (see app/layout.tsx). */
+  --font-display: var(--font-space-grotesk), var(--font-inter), system-ui, sans-serif;
+  --font-sans: var(--font-inter), system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, "SFMono-Regular", monospace;
+  --font-serif: var(--font-newsreader), Georgia, serif;
+
+  /* Elevation */
+  --shadow-1: 0 1px 2px rgba(20, 17, 24, 0.05), 0 12px 32px -16px rgba(43, 18, 72, 0.25);
+  --shadow-2: 0 24px 64px -24px rgba(20, 17, 24, 0.5);
+  --shadow-float: 0 24px 48px -20px rgba(0, 0, 0, 0.55);
+  --focus-ring: 0 0 0 2px #ffffff, 0 0 0 4px var(--brand-500);
+  --focus-ring-input: 0 0 0 3px rgba(116, 64, 191, 0.25);
+
+  /* Layout */
+  --sidebar-width: 232px;
+  --content-max: 1040px;
+  --landing-max: 1160px;
+  --chat-column: 720px;
+  --case-file-panel: 300px;
+  --form-column: 620px;
+
+  /* Motion */
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* Tailwind v4: tokens as utilities (bg-primary, text-ink-3, font-display, rounded-lg…). */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-hover: var(--sidebar-hover);
+  --color-sidebar-pill: var(--sidebar-pill);
+  --color-sidebar-track: var(--sidebar-track);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  --color-brand-950: var(--brand-950);
+  --color-brand-900: var(--brand-900);
+  --color-brand-700: var(--brand-700);
+  --color-brand-600: var(--brand-600);
+  --color-brand-500: var(--brand-500);
+  --color-brand-100: var(--brand-100);
+  --color-brand-50: var(--brand-50);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-ink-hover: var(--ink-hover);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-tint: var(--tint);
+  --color-canvas: var(--canvas);
+  --color-paper: var(--paper);
+  --color-muted-fg: var(--muted-fg);
+  --color-disabled-bg: var(--disabled-bg);
+  --color-disabled-fg: var(--disabled-fg);
+  --color-success: var(--success);
+  --color-success-bg: var(--success-bg);
+  --color-success-on-dark: var(--success-on-dark);
+  --color-warning: var(--warning);
+  --color-warning-text: var(--warning-text);
+  --color-warning-bg: var(--warning-bg);
+  --color-warning-bg-2: var(--warning-bg-2);
+  --color-warning-line: var(--warning-line);
+  --color-danger: var(--danger);
+  --color-danger-hover: var(--danger-hover);
+  --color-danger-active: var(--danger-active);
+  --color-danger-bg: var(--danger-bg);
+  --color-danger-line: var(--danger-line);
+
+  /* Temporary aliases while pages move to the new names (removed page by page). */
+  --color-brand-800: var(--brand-700);
+  --color-brand-400: var(--brand-500);
+  --color-brand-300: var(--line-strong);
+  --color-brand-200: var(--brand-100);
+  --color-gold-50: var(--brand-50);
+  --color-gold-100: var(--brand-100);
+  --color-gold-200: var(--brand-100);
+  --color-gold-300: var(--brand-100);
+  --color-gold-400: var(--paper);
+  --color-gold-500: var(--brand-700);
+  --color-gold-600: var(--brand-700);
+  --color-gold-700: var(--brand-700);
+
+  --font-display: var(--font-display);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+  --font-serif: var(--font-serif);
+
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-md: 10px;
+  --radius-lg: 12px;
+  --radius-xl: 14px;
+  --radius-2xl: 16px;
+  --radius-3xl: 18px;
+
+  --shadow-composer: var(--shadow-1);
+  --shadow-dialog: var(--shadow-2);
+  --shadow-float: var(--shadow-float);
+
+  --animate-manya-pulse: manya-pulse 1.4s var(--ease-out) infinite;
+  --animate-manya-dot: manya-dot 1.2s ease-in-out infinite both;
+  --animate-manya-in: manya-in 0.3s var(--ease-out) both;
 }
 
 html {
@@ -43,24 +216,57 @@ html {
 body {
   min-height: 100vh;
   margin: 0;
-  background: var(--color-paper);
-  color: var(--color-ink);
+  background: var(--background);
+  color: var(--foreground);
   font-family: var(--font-sans);
+  font-size: 15px;
+  line-height: 22px;
   -webkit-font-smoothing: antialiased;
 }
 
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  font-weight: 600;
+}
+
+::placeholder {
+  color: var(--placeholder);
+}
+
+:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
 ::selection {
-  background: var(--color-gold-200);
-  color: var(--color-brand-950);
+  background: var(--brand-100);
+  color: var(--brand-950);
 }
 
-.bg-grain {
-  background-image: radial-gradient(circle at 15% 10%, rgb(200 139 26 / 0.18), transparent 40%),
-    radial-gradient(circle at 85% 0%, rgb(132 68 163 / 0.35), transparent 45%),
-    linear-gradient(160deg, var(--color-brand-900), var(--color-brand-950));
+/* Motion used across the product (handoff/interaction-specifications.md). */
+@keyframes manya-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(76, 29, 128, 0.35);
+  }
+  100% {
+    box-shadow: 0 0 0 14px rgba(76, 29, 128, 0);
+  }
 }
-
-@keyframes rise {
+@keyframes manya-dot {
+  0%,
+  80%,
+  100% {
+    opacity: 0.25;
+    transform: translateY(0);
+  }
+  40% {
+    opacity: 1;
+    transform: translateY(-3px);
+  }
+}
+@keyframes manya-in {
   from {
     opacity: 0;
     transform: translateY(8px);
@@ -70,24 +276,22 @@ body {
     transform: none;
   }
 }
-
-.animate-rise {
-  animation: rise 0.35s ease-out both;
-}
-
-@keyframes pulse-dot {
+@keyframes manya-wave {
   0%,
-  80%,
   100% {
-    opacity: 0.25;
+    transform: scaleY(0.35);
   }
-  40% {
-    opacity: 1;
+  50% {
+    transform: scaleY(1);
   }
 }
 
+/* Kept for existing components until they move to animate-manya-*. */
+.animate-rise {
+  animation: manya-in 0.3s var(--ease-out) both;
+}
 .dot {
-  animation: pulse-dot 1.2s infinite ease-in-out both;
+  animation: manya-dot 1.2s ease-in-out infinite both;
 }
 .dot:nth-child(2) {
   animation-delay: 0.15s;
@@ -96,9 +300,16 @@ body {
   animation-delay: 0.3s;
 }
 
+/* Former gradient hero ground: now the flat sidebar purple. */
+.bg-grain {
+  background: var(--brand-900);
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .animate-rise,
-  .dot {
-    animation: none;
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
   }
 }
