@@ -4,16 +4,16 @@ import { en } from "../src/lib/i18n/en";
 
 import { register } from "./helpers";
 
-test("landing page explains the product and starts registration", async ({ page }) => {
+test("landing page explains the product and starts at sign-in", async ({ page }) => {
   await page.goto("/");
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(en["landing.title"]);
   await page.getByRole("link", { name: en["landing.start"] }).click();
-  await expect(page).toHaveURL(/\/register$/);
+  await expect(page).toHaveURL(/\/login$/);
 });
 
-test("pages that need a profile send a new visitor to registration", async ({ page }) => {
+test("pages that need a profile send a new visitor to sign-in", async ({ page }) => {
   await page.goto("/dashboard");
-  await expect(page).toHaveURL(/\/register$/);
+  await expect(page).toHaveURL(/\/login$/);
 });
 
 test("registration opens the dashboard with the main navigation", async ({ page }) => {
