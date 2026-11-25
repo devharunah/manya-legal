@@ -2,6 +2,8 @@ import { expect, test } from "@playwright/test";
 
 import { en } from "../src/lib/i18n/en";
 
+import { register } from "./helpers";
+
 test("signing in with any test email continues to the business profile", async ({ page }) => {
   await page.goto("/login");
   await expect(page.getByText(en["auth.demoNote"])).toBeVisible();
@@ -38,4 +40,16 @@ test("the hackathon demo opens the dashboard, ready to start the live demo", asy
   await page.getByRole("button", { name: en["demo.live"] }).click();
   await expect(page).toHaveURL(/\/cases\/[\w-]+$/, { timeout: 30_000 });
   await expect(page.getByTestId("demo-suggestion")).toBeVisible();
+});
+
+test("/login always shows, even for a registered trader, and nothing links to it", async ({
+  page,
+}) => {
+  await register(page);
+  await page.goto("/login");
+  await expect(page).toHaveURL(/\/login$/);
+  await expect(page.getByRole("button", { name: en["auth.hackathon"] })).toBeVisible();
+
+  await page.goto("/");
+  await expect(page.locator('a[href="/login"]')).toHaveCount(0);
 });

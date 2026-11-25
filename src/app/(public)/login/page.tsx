@@ -2,7 +2,7 @@
 
 import { Info, Loader2, PlayCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { type FormEvent, useEffect, useState } from "react";
+import { type FormEvent, useState } from "react";
 import { z } from "zod";
 
 import { api } from "@/components/app/client-api";
@@ -22,17 +22,17 @@ const tabClass =
   "text-ink-3 data-[state=active]:bg-white data-[state=active]:font-semibold data-[state=active]:text-brand-900 data-[state=active]:shadow-sm";
 
 /**
- * Demo sign-in and sign-up. There are no real accounts: any well-formed email
- * gets in, and the email and password never leave this component. Signing in
- * continues to the business-profile step (or the dashboard when this browser
- * already has a profile). The hackathon button signs in as the fictional
- * demo trader and opens the dashboard, where the live demo starts.
+ * Demo sign-in and sign-up, reached only by typing /login: nothing links here
+ * and the page never redirects on its own, so it always shows. There are no
+ * real accounts: any well-formed email continues to the business-profile
+ * step, and the email and password never leave this component. The
+ * hackathon button signs in as the fictional demo trader and opens the
+ * dashboard, where the live demo starts.
  */
 export default function LoginPage() {
   const t = useT();
   const router = useRouter();
-  const { state, setProfile } = useSession();
-  const registered = state.status === "ready" && state.profile !== null;
+  const { setProfile } = useSession();
 
   const [mode, setMode] = useState<Mode>("signIn");
   const [email, setEmail] = useState("");
@@ -41,10 +41,6 @@ export default function LoginPage() {
   const [passwordError, setPasswordError] = useState(false);
   const [demoBusy, setDemoBusy] = useState(false);
   const [demoError, setDemoError] = useState(false);
-
-  useEffect(() => {
-    if (registered) router.replace("/dashboard");
-  }, [registered, router]);
 
   function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();

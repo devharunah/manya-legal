@@ -46,7 +46,6 @@ export const en = {
     "See your options, from talking to the supplier to mediation or small claims, with the law behind each.",
   "landing.loading": "Opening MANYA…",
 
-  "auth.signInLink": "Sign in",
   "auth.title": "Welcome to MANYA",
   "auth.body": "Sign in to continue your cases, or create an account to start one.",
   "auth.signIn": "Sign in",
