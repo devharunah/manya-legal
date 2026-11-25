@@ -33,7 +33,7 @@ export default function Home() {
               {t("landing.body")}
             </p>
             <Link
-              href={registered ? "/dashboard" : "/login"}
+              href={registered ? "/dashboard" : "/register"}
               className="mt-8 inline-flex items-center justify-center gap-2 rounded-xl bg-gold-400 px-6 py-3.5 font-semibold text-brand-950 shadow-lg shadow-gold-500/20 transition hover:bg-gold-300"
             >
               {t("landing.start")} <ArrowRight className="size-4" aria-hidden />

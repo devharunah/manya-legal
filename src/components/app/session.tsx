@@ -58,7 +58,7 @@ export function useSession(): Session {
 
 /**
  * Renders children only for a registered trader; sends everyone else to
- * sign-in. Shows a loading or error state while the session starts.
+ * registration. Shows a loading or error state while the session starts.
  */
 export function RequireProfile({ children }: { children: (profile: Profile) => React.ReactNode }) {
   const { state, reload } = useSession();
@@ -67,7 +67,7 @@ export function RequireProfile({ children }: { children: (profile: Profile) => R
   const needsRegistration = state.status === "ready" && !state.profile;
 
   useEffect(() => {
-    if (needsRegistration) router.replace("/login");
+    if (needsRegistration) router.replace("/register");
   }, [needsRegistration, router]);
 
   if (state.status === "error") {
