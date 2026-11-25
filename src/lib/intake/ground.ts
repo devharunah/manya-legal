@@ -55,7 +55,7 @@ export function amountsIn(text: string): number[] {
 export const amountGrounded = (amount: number, text: string) => amountsIn(text).includes(amount);
 
 const MONTHS =
-  /\b(jan|feb|mar|apr|may|jun|jul|aug|sep|sept|oct|nov|dec)[a-z]*\b|\b(yesterday|today|last|ago|week|month|monday|tuesday|wednesday|thursday|friday|saturday|sunday)\b|\d/i;
+  /\b(jan|feb|mar|apr|may|jun|jul|aug|sep|sept|oct|nov|dec)[a-z]*\b|\b(yesterday|today|tomorrow|tonight|last|next|ago|week|month|monday|tuesday|wednesday|thursday|friday|saturday|sunday)\b|\d/i;
 
 /** A date is kept only if it is a real ISO date and the trader mentioned some date. */
 export function dateGrounded(iso: string, text: string): boolean {
