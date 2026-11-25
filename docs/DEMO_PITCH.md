@@ -8,13 +8,23 @@ Nakato runs a general store in Kikuubo. Her trading licence is about to lapse. T
 
 ## Live demo script (about 3 minutes)
 
-1. **Landing (20 s).** The problem in three words: find, understand, apply. Show the same law side by side: section 8(1) as written, and what we tell a Kikuubo retailer.
-2. **Onboarding (20 s).** Five questions with a prefilled Kikuubo retailer. Point out "saved only in this browser" and the request not to enter ID numbers.
-3. **Scenario 1: requirements (40 s).** *"What do I need to legally operate my retail shop in Kampala?"* The answer covers the three registrations (URSB, TIN, KCCA licence), cites s.8(1) and URA's guide, and notes that other licences may apply (s.33). Open a citation to show the source drawer, with the exact wording, its currency and the official link.
-4. **Scenario 2: consequences (40 s).** *"What could happen if I operate without the required trading licence?"* It is an offence, with a fine and/or up to 12 months, and the court can revoke the licence or disqualify the trader. Point out that **no fine amount is invented**, because the current figure is not in our sources, and say what to confirm with KCCA.
-5. **Scenario 3: renewal (40 s).** *"My trading licence is expiring. What should I do?"* It is valid 12 months from issue, so renew immediately, and it lists what to bring. Flip to **Original law** to show that the old "expires 31 December" section is flagged as *older text, may be outdated*. That is legal currency in action.
-6. **Refusal (20 s).** *"How do I file for divorce?"* The reply is "not covered by our sources" with referrals to the ULS Legal Aid Project and Justice Centres. There is no guessing.
-7. **Close (10 s).** Open `/sources`: every document, its date and its status. Next come employment, tax and tenancy, then Luganda, WhatsApp and USSD.
+The story is fictional: Sarah Namusoke paid Daniel Okello UGX 2,000,000 for household merchandise that never arrived. Every file is marked SAMPLE.
+
+**Before going on stage**
+- Download the four SAMPLE files from `/demo/` into one folder you can find quickly.
+- **Tab A (safety net):** on the landing page, tap **Open the demo case**. This loads the finished case with its report, documents and options. The first load takes about 20 seconds.
+- **Tab B (live):** tap **Start live demo** once, to warm up the session.
+- Have a phone hotspot ready.
+
+**On stage (Tab B)**
+1. **Report (90 s).** Above the message box, a dashed **Demo answer** chip shows a prepared answer for the question on screen. Tap it, then the arrow. The chip answers are read instantly, without AI, so the chat cannot stall or refuse. Repeat for the opening account and then the agreement, parties, what happened and outcome questions. Point out the "Step n of 6" bar.
+2. **Review (30 s).** Show the grouped fields and the events in order. Tick the confirmation box and create the PDF report.
+3. **Organise (30 s).** Upload the four SAMPLE files. Each is read, categorised and marked "not verified".
+4. **Resolve (30 s).** Show the possible ways forward: negotiation, voluntary mediation and small claims, which requires further assessment. Each comes with its source, and the preliminary notice is visible.
+
+**If anything stalls**, switch to Tab A ("here is one we prepared earlier"). That case also holds Brian Ssemanda's case, where the receipt shows 1,500,000 against the 2,000,000 reported. Use it to show the inconsistency flag.
+
+A judge's own sentence, typed instead of the chip, goes through the normal AI reading. It works, but it depends on the AI provider being available.
 
 ## Why it matters for the theme
 

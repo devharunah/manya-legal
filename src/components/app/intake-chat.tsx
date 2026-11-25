@@ -1,9 +1,10 @@
 "use client";
 
-import { ClipboardCheck, Info, Loader2 } from "lucide-react";
+import { ClipboardCheck, Info, Loader2, Sparkles } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 import type { CaseRecord, Message } from "@/lib/cases/types";
+import { suggestedAnswer } from "@/lib/demo/script";
 import { type MessageKey, en } from "@/lib/i18n/en";
 import { useT } from "@/lib/i18n/use-t";
 import { decodeFields, stepNumber } from "@/lib/intake/progress";
@@ -62,10 +63,16 @@ export function IntakeChat({
   const [lang] = useLanguage();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [draft, setDraft] = useState<{ text: string; nonce: number }>();
   const endRef = useRef<HTMLLIElement>(null);
 
   const lastManya = [...messages].reverse().find((m) => m.sender === "manya");
   const asking = lastManya?.field ? decodeFields(lastManya.field) : [];
+  // Live stage demo: a prepared answer for the question on screen.
+  const suggestion =
+    record.intake.demo === "live"
+      ? suggestedAnswer(lastManya?.originalText ?? null, messages.length > 0)
+      : null;
   const open =
     record.status === "draft" ||
     record.status === "collecting_information" ||
@@ -154,7 +161,25 @@ export function IntakeChat({
 
       {open && (
         <div className="mt-3">
+          {suggestion && (
+            <button
+              type="button"
+              disabled={busy}
+              data-testid="demo-suggestion"
+              onClick={() => setDraft({ text: suggestion, nonce: Date.now() })}
+              className="mb-2 flex w-full items-start gap-2 rounded-xl border border-dashed border-gold-400 bg-gold-50 px-3 py-2 text-left text-sm text-ink transition hover:bg-gold-100 disabled:opacity-60"
+            >
+              <Sparkles className="mt-0.5 size-4 shrink-0 text-gold-600" aria-hidden />
+              <span>
+                <span className="block text-xs font-semibold text-gold-700">
+                  {t("demo.suggested")}
+                </span>
+                <span className="line-clamp-2">{suggestion}</span>
+              </span>
+            </button>
+          )}
           <Composer
+            {...(draft ? { draft } : {})}
             busy={busy}
             placeholder={messages.length === 0 ? t("intake.placeholder") : t("intake.answerHere")}
             onSend={(text, inputType) => post({ text, inputType })}
