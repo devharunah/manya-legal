@@ -83,7 +83,7 @@ function Editor({
         <button
           type="button"
           onClick={onCancel}
-          className="rounded-lg px-3 py-2 text-sm font-medium text-muted"
+          className="rounded-lg px-3 py-2 text-sm font-medium text-ink-3"
         >
           {t("review.cancel")}
         </button>
@@ -148,11 +148,11 @@ export function ReviewPanel({
       className="rounded-3xl border border-line bg-white p-5 shadow-sm sm:p-6"
     >
       <h2 id="review-title" className="font-display text-2xl font-semibold text-brand-900">
-        <p className="mt-1 text-sm text-muted">
+        <p className="mt-1 text-sm text-ink-3">
           {t("review.accurate")} {t("review.body")}
         </p>
       </h2>
-      <p className="mt-1 text-sm text-muted">{t("review.body")}</p>
+      <p className="mt-1 text-sm text-ink-3">{t("review.body")}</p>
 
       <div className="mt-4">
         <CaseSummary key={record.updatedAt} caseId={record.id} />
@@ -179,7 +179,7 @@ export function ReviewPanel({
                 const required = spec.need === "required";
                 return (
                   <div key={key} className="py-3" data-field={key}>
-                    <dt className="flex items-center justify-between gap-2 text-xs font-semibold uppercase tracking-wide text-muted">
+                    <dt className="flex items-center justify-between gap-2 text-xs font-semibold uppercase tracking-wide text-ink-3">
                       <span>
                         {t(`field.${key}`)}
                         {required && <span aria-hidden> *</span>}
@@ -208,16 +208,16 @@ export function ReviewPanel({
                           <span className="text-base font-medium text-ink">
                             {displayValue(t, key, field)}
                           </span>
-                          <span className="ml-2 inline-flex items-center gap-1 text-xs text-muted">
+                          <span className="ml-2 inline-flex items-center gap-1 text-xs text-ink-3">
                             {field.confirmed && (
-                              <CheckCircle2 className="size-3 text-emerald-600" aria-hidden />
+                              <CheckCircle2 className="size-3 text-success" aria-hidden />
                             )}
                             {t(`provenance.${field.source}`)}
                           </span>
                         </>
                       ) : (
                         <span
-                          className={`text-sm italic ${required && !unknown ? "text-gold-700" : "text-muted"}`}
+                          className={`text-sm italic ${required && !unknown ? "text-gold-700" : "text-ink-3"}`}
                         >
                           {unknown ? t("review.unknown") : t("review.notProvided")}
                         </span>
@@ -283,7 +283,7 @@ export function ReviewPanel({
       )}
 
       {error && (
-        <p role="alert" className="mt-3 text-sm text-red-700">
+        <p role="alert" className="mt-3 text-sm text-danger">
           {error}
         </p>
       )}
@@ -291,7 +291,7 @@ export function ReviewPanel({
       {reports.length > 0 && (
         <div className="mt-5 space-y-2">
           {record.status === "report_generated" && (
-            <p className="flex items-center gap-2 text-sm font-semibold text-emerald-700">
+            <p className="flex items-center gap-2 text-sm font-semibold text-success">
               <CheckCircle2 className="size-4" aria-hidden /> {t("review.generated")}
             </p>
           )}
@@ -307,7 +307,7 @@ export function ReviewPanel({
         </div>
       )}
 
-      <p className="mt-5 border-t border-line pt-4 text-xs leading-5 text-muted">
+      <p className="mt-5 border-t border-line pt-4 text-xs leading-5 text-ink-3">
         {t("review.disclaimer")}
       </p>
     </section>

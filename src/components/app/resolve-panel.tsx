@@ -35,7 +35,7 @@ function PathwayCard({ p, onPrepare }: { p: Pathway; onPrepare: (p: PathwayType)
         <span
           className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ring-1 ring-inset ${
             p.status === "potential_option"
-              ? "bg-emerald-50 text-emerald-800 ring-emerald-200"
+              ? "bg-success-bg text-success ring-success-bg"
               : "bg-gold-50 text-gold-700 ring-gold-200"
           }`}
         >
@@ -43,7 +43,7 @@ function PathwayCard({ p, onPrepare }: { p: Pathway; onPrepare: (p: PathwayType)
         </span>
       </div>
       <div>
-        <p className="text-xs font-semibold uppercase tracking-wide text-muted">
+        <p className="text-xs font-semibold uppercase tracking-wide text-ink-3">
           {t("resolve.why")}
         </p>
         {p.why.map((line) => (
@@ -53,7 +53,7 @@ function PathwayCard({ p, onPrepare }: { p: Pathway; onPrepare: (p: PathwayType)
         ))}
       </div>
       <div>
-        <p className="text-xs font-semibold uppercase tracking-wide text-muted">
+        <p className="text-xs font-semibold uppercase tracking-wide text-ink-3">
           {t("resolve.steps")}
         </p>
         {p.steps.map((line) => (
@@ -63,7 +63,7 @@ function PathwayCard({ p, onPrepare }: { p: Pathway; onPrepare: (p: PathwayType)
         ))}
       </div>
       <div>
-        <p className="text-xs font-semibold uppercase tracking-wide text-muted">
+        <p className="text-xs font-semibold uppercase tracking-wide text-ink-3">
           {t("resolve.check")}
         </p>
         <ul className="mt-1 list-disc space-y-0.5 pl-5">
@@ -77,11 +77,11 @@ function PathwayCard({ p, onPrepare }: { p: Pathway; onPrepare: (p: PathwayType)
       {p.chunkIds.length > 0 ? (
         <LawSources chunkIds={p.chunkIds} />
       ) : (
-        <p className="text-xs text-muted">{t("resolve.agreementSource")}</p>
+        <p className="text-xs text-ink-3">{t("resolve.agreementSource")}</p>
       )}
       {providers.length > 0 && (
         <div className="space-y-2">
-          <p className="text-xs font-semibold uppercase tracking-wide text-muted">
+          <p className="text-xs font-semibold uppercase tracking-wide text-ink-3">
             {t("resolve.providers")}
           </p>
           {providers.map((prov) => (
@@ -166,7 +166,7 @@ function ReferralForm({
       <h3 id="referral-title" className="font-display text-xl font-semibold text-brand-900">
         {t("referral.title")}
       </h3>
-      <p className="flex gap-2 text-sm text-muted">
+      <p className="flex gap-2 text-sm text-ink-3">
         <Lock className="mt-0.5 size-4 shrink-0" aria-hidden /> {t("referral.body")}
       </p>
       <label className="block text-sm font-semibold text-ink">
@@ -223,7 +223,7 @@ function ReferralForm({
         {t("referral.consent", { n: provider?.name ?? "" })}
       </label>
       {error && (
-        <p role="alert" className="text-sm text-red-700">
+        <p role="alert" className="text-sm text-danger">
           {error}
         </p>
       )}
@@ -240,7 +240,7 @@ function ReferralForm({
         <button
           type="button"
           onClick={onCancel}
-          className="rounded-xl px-4 py-3 text-sm font-medium text-muted"
+          className="rounded-xl px-4 py-3 text-sm font-medium text-ink-3"
         >
           {t("review.cancel")}
         </button>
@@ -271,7 +271,7 @@ export function ResolvePanel({
     return (
       <section className="rounded-3xl border border-line bg-white p-6 shadow-sm">
         <h2 className="font-display text-2xl font-semibold text-brand-900">{t("resolve.title")}</h2>
-        <p className="mt-2 text-sm text-muted">{t("resolve.needReport")}</p>
+        <p className="mt-2 text-sm text-ink-3">{t("resolve.needReport")}</p>
       </section>
     );
   }
@@ -280,7 +280,7 @@ export function ResolvePanel({
     <section className="space-y-4">
       <div className="rounded-3xl border border-line bg-white p-5 shadow-sm">
         <h2 className="font-display text-2xl font-semibold text-brand-900">{t("resolve.title")}</h2>
-        <p className="mt-1 text-sm text-muted">{t("resolve.body")}</p>
+        <p className="mt-1 text-sm text-ink-3">{t("resolve.body")}</p>
         <p
           className="mt-3 rounded-xl bg-gold-50 p-3 text-xs leading-5 text-gold-700"
           data-testid="resolve-disclaimer"
@@ -290,8 +290,8 @@ export function ResolvePanel({
       </div>
 
       {referrals.length > 0 && (
-        <div className="space-y-2 rounded-3xl border border-emerald-200 bg-emerald-50 p-5">
-          <p className="text-sm font-semibold text-emerald-800">{t("referral.ready")}</p>
+        <div className="space-y-2 rounded-3xl border border-success-bg bg-success-bg p-5">
+          <p className="text-sm font-semibold text-success">{t("referral.ready")}</p>
           {referrals.map((r) => (
             <a
               key={r.id}

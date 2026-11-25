@@ -152,7 +152,7 @@ export function IntakeChat({
           <Bubble key={m.id} m={m} />
         ))}
         {busy && (
-          <li className="flex items-center gap-2 text-sm text-muted">
+          <li className="flex items-center gap-2 text-sm text-ink-3">
             <Loader2 className="size-4 animate-spin" aria-hidden /> {t("intake.thinking")}
           </li>
         )}
@@ -190,7 +190,7 @@ export function IntakeChat({
                 type="button"
                 disabled={busy}
                 onClick={() => void post({ skip: true })}
-                className="rounded-lg border border-line bg-white px-3 py-1.5 text-sm font-medium text-muted hover:text-brand-800"
+                className="rounded-lg border border-line bg-white px-3 py-1.5 text-sm font-medium text-ink-3 hover:text-brand-800"
               >
                 {t("intake.skip")}
               </button>
@@ -207,11 +207,11 @@ export function IntakeChat({
             )}
           </div>
           {error && (
-            <p role="alert" className="mt-2 text-sm text-red-700">
+            <p role="alert" className="mt-2 text-sm text-danger">
               {error}
             </p>
           )}
-          <p className="mt-3 flex gap-1.5 text-xs leading-5 text-muted">
+          <p className="mt-3 flex gap-1.5 text-xs leading-5 text-ink-3">
             <Info className="mt-0.5 size-3.5 shrink-0" aria-hidden />
             {t("intake.micHint")} {t("intake.aiNotice")}{" "}
             {lang === "lug" ? t("intake.voiceNotice") : ""}

@@ -59,7 +59,7 @@ export function CaseSummary({ caseId }: { caseId: string }) {
           <button
             type="button"
             onClick={stop}
-            className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-semibold text-muted hover:text-brand-800"
+            className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-semibold text-ink-3 hover:text-brand-800"
           >
             <Square className="size-3.5 fill-current" aria-hidden /> {t("summary.stop")}
           </button>
@@ -93,11 +93,11 @@ export function CaseSummary({ caseId }: { caseId: string }) {
               aria-hidden
             />
           )}
-          {isLoading && !completion && <span className="text-muted">{t("summary.writing")}</span>}
+          {isLoading && !completion && <span className="text-ink-3">{t("summary.writing")}</span>}
         </p>
       )}
       {translating && (
-        <p className="mt-2 flex items-center gap-2 text-sm text-muted">
+        <p className="mt-2 flex items-center gap-2 text-sm text-ink-3">
           <Loader2 className="size-4 animate-spin" aria-hidden /> {t("summary.translating")}
         </p>
       )}
@@ -107,11 +107,11 @@ export function CaseSummary({ caseId }: { caseId: string }) {
         </p>
       )}
       {(error || empty) && (
-        <p role="alert" className="mt-2 text-sm text-red-700">
+        <p role="alert" className="mt-2 text-sm text-danger">
           {t("summary.error")}
         </p>
       )}
-      <p className="mt-2 text-xs text-muted">
+      <p className="mt-2 text-xs text-ink-3">
         {completion ? t("summary.notice") : t("summary.body")}
       </p>
     </section>

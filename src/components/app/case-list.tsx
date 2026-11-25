@@ -11,6 +11,8 @@ import { formatAmount } from "@/lib/intake/display";
 import { completion } from "@/lib/intake/progress";
 import { useLanguage } from "@/lib/use-language";
 
+import { StatusBadge } from "@/components/manya/tags";
+
 import { api } from "./client-api";
 
 export function useCases() {
@@ -24,25 +26,13 @@ export function useCases() {
   return { cases, error };
 }
 
+/** Case status as colour plus word (kept as an alias of StatusBadge). */
 export function StatusPill({ status }: { status: CaseRecord["status"] }) {
-  const t = useT();
-  const tone =
-    status === "report_generated" || status === "completed"
-      ? "bg-emerald-50 text-emerald-800 ring-emerald-200"
-      : status === "awaiting_user_confirmation"
-        ? "bg-gold-50 text-gold-700 ring-gold-200"
-        : "bg-brand-50 text-brand-800 ring-brand-200";
-  return (
-    <span
-      className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ring-1 ring-inset ${tone}`}
-    >
-      {t(`status.${status}`)}
-    </span>
-  );
+  return <StatusBadge status={status} />;
 }
 
-export function NewCaseButton({ className = "" }: { className?: string }) {
-  const t = useT();
+/** Starts a new dispute in the chosen language and opens it. */
+export function useStartCase() {
   const [lang] = useLanguage();
   const router = useRouter();
   const [busy, setBusy] = useState(false);
@@ -61,6 +51,12 @@ export function NewCaseButton({ className = "" }: { className?: string }) {
       setBusy(false);
     }
   }
+  return { start, busy, error };
+}
+
+export function NewCaseButton({ className = "" }: { className?: string }) {
+  const t = useT();
+  const { start, busy, error } = useStartCase();
 
   return (
     <div className={className}>
@@ -78,7 +74,7 @@ export function NewCaseButton({ className = "" }: { className?: string }) {
         {t("dashboard.newButton")}
       </button>
       {error && (
-        <p role="alert" className="mt-2 text-sm text-red-200">
+        <p role="alert" className="mt-2 text-sm text-danger-line">
           {error}
         </p>
       )}
@@ -90,7 +86,7 @@ export function CaseList({ cases, empty }: { cases: CaseRecord[]; empty: string 
   const t = useT();
   if (cases.length === 0)
     return (
-      <p className="rounded-2xl border border-dashed border-line p-6 text-sm text-muted">{empty}</p>
+      <p className="rounded-2xl border border-dashed border-line p-6 text-sm text-ink-3">{empty}</p>
     );
   return (
     <ul className="space-y-3">
@@ -116,14 +112,14 @@ export function CaseList({ cases, empty }: { cases: CaseRecord[]; empty: string 
                 <p className="mt-1 truncate font-semibold text-ink">
                   {supplier ? String(supplier) : t("cases.unnamed")}
                 </p>
-                <p className="mt-0.5 text-sm text-muted">
+                <p className="mt-0.5 text-sm text-ink-3">
                   {amount && typeof amount.value === "number"
                     ? `${currency} ${formatAmount(amount.value)} · `
                     : ""}
                   {t("case.progressReport")} {completion(c.intake)}%
                 </p>
               </div>
-              <ChevronRight className="size-5 shrink-0 text-muted" aria-label={t("cases.open")} />
+              <ChevronRight className="size-5 shrink-0 text-ink-3" aria-label={t("cases.open")} />
             </Link>
           </li>
         );

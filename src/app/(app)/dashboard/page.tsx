@@ -11,9 +11,9 @@ import { useT } from "@/lib/i18n/use-t";
 function Cases() {
   const t = useT();
   const { cases, error } = useCases();
-  if (error) return <p className="text-sm text-red-700">{error}</p>;
+  if (error) return <p className="text-sm text-danger">{error}</p>;
   if (!cases)
-    return <Loader2 className="size-5 animate-spin text-muted" aria-label={t("common.loading")} />;
+    return <Loader2 className="size-5 animate-spin text-ink-3" aria-label={t("common.loading")} />;
   const active = cases.filter((c) => c.status !== "completed");
   const done = cases.filter((c) => c.status === "completed");
   return (
@@ -35,7 +35,7 @@ function Cases() {
 export default function DashboardPage() {
   const t = useT();
   return (
-    <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
+    <div className="mx-auto w-full max-w-[1040px]">
       <RequireProfile>
         {(profile) => (
           <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
@@ -59,13 +59,13 @@ export default function DashboardPage() {
             </div>
             <aside className="space-y-4">
               <section className="rounded-2xl border border-line bg-white p-5 shadow-sm">
-                <h2 className="flex items-center gap-2 text-sm font-semibold text-muted">
+                <h2 className="flex items-center gap-2 text-sm font-semibold text-ink-3">
                   <Store className="size-4" aria-hidden /> {t("dashboard.profile")}
                 </h2>
                 <p className="mt-2 font-semibold text-ink">
                   {profile.businessName || profile.fullName}
                 </p>
-                <p className="text-sm text-muted">
+                <p className="text-sm text-ink-3">
                   {t(`businessType.${profile.businessType}` as Parameters<typeof t>[0])}
                   {profile.location ? ` · ${profile.location}` : ""}
                 </p>
@@ -83,14 +83,14 @@ export default function DashboardPage() {
                 <Archive className="size-5 text-brand-700" aria-hidden />
                 <span className="flex-1">
                   <span className="block font-semibold text-ink">{t("nav.vault")}</span>
-                  <span className="block text-sm text-muted">{t("dashboard.vaultBody")}</span>
+                  <span className="block text-sm text-ink-3">{t("dashboard.vaultBody")}</span>
                 </span>
-                <ChevronRight className="size-4 text-muted" aria-hidden />
+                <ChevronRight className="size-4 text-ink-3" aria-hidden />
               </Link>
             </aside>
           </div>
         )}
       </RequireProfile>
-    </main>
+    </div>
   );
 }

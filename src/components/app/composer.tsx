@@ -17,7 +17,7 @@ function LevelBars({ level }: { level: number }) {
         <span
           // biome-ignore lint/suspicious/noArrayIndexKey: fixed decorative bars
           key={i}
-          className="w-1 rounded-full bg-red-500 transition-[height] duration-100"
+          className="w-1 rounded-full bg-danger transition-[height] duration-100"
           style={{ height: `${Math.max(15, Math.min(100, level * w * 140))}%` }}
         />
       ))}
@@ -113,7 +113,7 @@ export function Composer({
       <div
         className={`rounded-2xl border bg-white shadow-sm transition focus-within:ring-2 ${
           recording
-            ? "border-red-300 focus-within:ring-red-100"
+            ? "border-danger-line focus-within:ring-danger-bg"
             : "border-line focus-within:border-brand-400 focus-within:ring-brand-100"
         }`}
       >
@@ -124,10 +124,10 @@ export function Composer({
           >
             {recording ? (
               <>
-                <span className="size-2 animate-pulse rounded-full bg-red-500" aria-hidden />
-                <span className="text-red-700">{t("mic.listening")}</span>
+                <span className="size-2 animate-pulse rounded-full bg-danger" aria-hidden />
+                <span className="text-danger">{t("mic.listening")}</span>
                 <LevelBars level={recorder.level} />
-                <span className="ml-auto tabular-nums text-muted">
+                <span className="ml-auto tabular-nums text-ink-3">
                   {clock(recorder.seconds)} / {clock(MAX_SECONDS)}
                 </span>
               </>
@@ -158,7 +158,7 @@ export function Composer({
                 void send();
               }
             }}
-            className="max-h-42 min-h-11 flex-1 resize-none bg-transparent px-2 py-2.5 text-base leading-6 text-ink outline-none placeholder:text-muted/70"
+            className="max-h-42 min-h-11 flex-1 resize-none bg-transparent px-2 py-2.5 text-base leading-6 text-ink outline-none placeholder:text-ink-3/70"
           />
           <button
             type="button"
@@ -168,7 +168,7 @@ export function Composer({
             data-state={recorder.state}
             className={`grid size-11 shrink-0 place-items-center rounded-xl transition disabled:opacity-50 ${
               recording
-                ? "bg-red-600 text-white hover:bg-red-700"
+                ? "bg-danger text-white hover:bg-danger-hover"
                 : "text-brand-800 hover:bg-brand-50"
             }`}
           >
@@ -196,7 +196,7 @@ export function Composer({
         </div>
       </div>
       {recorder.error && (
-        <p role="alert" className="mt-2 text-sm text-red-700">
+        <p role="alert" className="mt-2 text-sm text-danger">
           {t(recorder.error)}
         </p>
       )}

@@ -1,15 +1,18 @@
 import type { Metadata, Viewport } from "next";
-import { Fraunces, Plus_Jakarta_Sans } from "next/font/google";
+import { Inter, JetBrains_Mono, Newsreader, Space_Grotesk } from "next/font/google";
 
 import { SessionProvider } from "@/components/app/session";
 import { HtmlLang } from "@/components/html-lang";
-import { SiteFooter } from "@/components/site-footer";
-import { SiteHeader } from "@/components/site-header";
+import { Toaster } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 import "./globals.css";
 
-const jakarta = Plus_Jakarta_Sans({ subsets: ["latin"], variable: "--font-jakarta" });
-const fraunces = Fraunces({ subsets: ["latin"], variable: "--font-fraunces" });
+const display = Space_Grotesk({ subsets: ["latin"], variable: "--font-space-grotesk" });
+const sans = Inter({ subsets: ["latin"], variable: "--font-inter" });
+const mono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-jetbrains" });
+// Only the dispute report preview uses the serif.
+const serif = Newsreader({ subsets: ["latin"], variable: "--font-newsreader", preload: false });
 
 export const metadata: Metadata = {
   title: "MANYA | Commercial Justice Companion",
@@ -18,7 +21,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#2e1239",
+  themeColor: "#2b1248", // --brand-900
 };
 
 export default function RootLayout({
@@ -27,13 +30,17 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${jakarta.variable} ${fraunces.variable}`}>
-      <body className="flex min-h-screen flex-col">
+    <html
+      lang="en"
+      className={`${display.variable} ${sans.variable} ${mono.variable} ${serif.variable}`}
+    >
+      <body>
         <SessionProvider>
-          <HtmlLang />
-          <SiteHeader />
-          <div className="flex-1">{children}</div>
-          <SiteFooter />
+          <TooltipProvider delayDuration={300}>
+            <HtmlLang />
+            {children}
+            <Toaster />
+          </TooltipProvider>
         </SessionProvider>
       </body>
     </html>

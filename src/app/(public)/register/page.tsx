@@ -21,7 +21,7 @@ export default function RegisterPage() {
   return (
     <main className="mx-auto max-w-lg px-4 py-10 sm:py-14">
       <h1 className="font-display text-3xl font-semibold text-brand-900">{t("register.title")}</h1>
-      <p className="mt-2 text-muted">{t("register.body")}</p>
+      <p className="mt-2 text-ink-3">{t("register.body")}</p>
       <div className="mt-8">
         {state.status === "ready" && !registered ? (
           <ProfileForm
@@ -30,10 +30,10 @@ export default function RegisterPage() {
             onSaved={() => router.push("/dashboard")}
           />
         ) : state.status === "error" ? (
-          <p className="text-sm text-red-700">{state.message}</p>
+          <p className="text-sm text-danger">{state.message}</p>
         ) : (
           <Loader2
-            className="mx-auto size-6 animate-spin text-muted"
+            className="mx-auto size-6 animate-spin text-ink-3"
             aria-label={t("common.loading")}
           />
         )}

@@ -87,9 +87,9 @@ export function UploadButton({
           }}
         />
       </label>
-      <p className="mt-1.5 text-xs text-muted">{t("evidence.types")}</p>
+      <p className="mt-1.5 text-xs text-ink-3">{t("evidence.types")}</p>
       {error && (
-        <p role="alert" className="mt-2 text-sm text-red-700">
+        <p role="alert" className="mt-2 text-sm text-danger">
           {error}
         </p>
       )}
@@ -170,7 +170,7 @@ export function DocumentCard({
       <header className="flex flex-wrap items-start justify-between gap-2">
         <div className="min-w-0">
           <p className="truncate font-semibold text-ink">{doc.filename}</p>
-          <p className="mt-0.5 flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted">
+          <p className="mt-0.5 flex flex-wrap gap-x-3 gap-y-1 text-xs text-ink-3">
             <span className="inline-flex items-center gap-1">
               <Fingerprint className="size-3" aria-hidden />{" "}
               {t("evidence.integrity", { n: doc.sha256.slice(0, 12) })}
@@ -199,7 +199,7 @@ export function DocumentCard({
       )}
 
       <p
-        className={`mt-3 text-xs font-semibold ${doc.userConfirmed ? "text-emerald-700" : "text-gold-700"}`}
+        className={`mt-3 text-xs font-semibold ${doc.userConfirmed ? "text-success" : "text-gold-700"}`}
       >
         {doc.userConfirmed ? (
           <span className="inline-flex items-center gap-1">
@@ -219,7 +219,7 @@ export function DocumentCard({
         className="mt-3 grid gap-3 sm:grid-cols-2"
         key={`${doc.id}-${doc.userConfirmed}`}
       >
-        <label className="text-xs font-semibold text-muted sm:col-span-2">
+        <label className="text-xs font-semibold text-ink-3 sm:col-span-2">
           {t("evidence.category")}
           <select name="category" defaultValue={doc.category} className={input}>
             {DOCUMENT_CATEGORIES.map((c) => (
@@ -232,7 +232,7 @@ export function DocumentCard({
         {FIELDS.map(([name, label, type]) => {
           const value = e?.[name];
           return (
-            <label key={name} className="text-xs font-semibold text-muted">
+            <label key={name} className="text-xs font-semibold text-ink-3">
               {t(label)}
               <input
                 name={name}
@@ -254,7 +254,7 @@ export function DocumentCard({
             {t("evidence.confirm")}
           </button>
           {error && (
-            <p role="alert" className="mt-2 text-sm text-red-700">
+            <p role="alert" className="mt-2 text-sm text-danger">
               {error}
             </p>
           )}
@@ -286,14 +286,14 @@ export function EvidencePanel({
         <h2 className="font-display text-2xl font-semibold text-brand-900">
           {t("evidence.title")}
         </h2>
-        <p className="mt-1 text-sm text-muted">{t("evidence.body")}</p>
+        <p className="mt-1 text-sm text-ink-3">{t("evidence.body")}</p>
         <div className="mt-4">
           <UploadButton
             caseId={record.id}
             onUploaded={(d) => update((w) => ({ ...w, documents: [...w.documents, d] }))}
           />
         </div>
-        <details className="mt-3 text-xs text-muted">
+        <details className="mt-3 text-xs text-ink-3">
           <summary className="cursor-pointer font-semibold text-brand-700">
             {t("evidence.samples")}
           </summary>
@@ -309,12 +309,12 @@ export function EvidencePanel({
           <p className="mt-1">{t("demo.note")}</p>
         </details>
         {!record.intake.values["transaction.amount"] && (
-          <p className="mt-3 text-xs text-muted">{t("evidence.reportFirst")}</p>
+          <p className="mt-3 text-xs text-ink-3">{t("evidence.reportFirst")}</p>
         )}
       </div>
 
       {documents.length === 0 ? (
-        <p className="rounded-2xl border border-dashed border-line p-6 text-sm text-muted">
+        <p className="rounded-2xl border border-dashed border-line p-6 text-sm text-ink-3">
           {t("evidence.empty")}
         </p>
       ) : (

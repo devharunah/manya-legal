@@ -9,7 +9,7 @@ import type { Currency } from "@/lib/kb/types";
 const STYLES: Record<Currency, { label: MessageKey; className: string; Icon: typeof Info }> = {
   current: {
     label: "currency.current",
-    className: "bg-emerald-50 text-emerald-800 ring-emerald-200",
+    className: "bg-success-bg text-success ring-success-bg",
     Icon: CheckCircle2,
   },
   secondary: {
@@ -19,7 +19,7 @@ const STYLES: Record<Currency, { label: MessageKey; className: string; Icon: typ
   },
   historical: {
     label: "currency.historical",
-    className: "bg-orange-50 text-orange-800 ring-orange-200",
+    className: "bg-warning-bg-2 text-warning-text ring-warning-line",
     Icon: History,
   },
 };
