@@ -18,6 +18,7 @@ import {
 } from "./fields";
 import { heuristicExtract } from "./heuristic";
 import type { Extraction } from "./merge";
+import { kampalaToday, relativeDateHints } from "./relative-date";
 
 /** What the model may return. Keys use "__" for "."; every field is nullable. */
 const schema = z.object({
@@ -63,7 +64,7 @@ Rules:
 - Facts are the trader's account, not established truth.
 - The respondent is the supplier or other party; the complainant is the trader.
 - Amounts: a plain number ("2 million" -> 2000000). Currency: ISO code; Uganda shillings, "shs", "/=" -> UGX. Only use another currency if the trader names it.
-- Dates: yyyy-mm-dd, resolving relative dates from today's date; if the day cannot be worked out, null.
+- Dates: yyyy-mm-dd. Traders often give relative days ("yesterday", "yesterday but one", "two days ago", "last Monday"): resolve them from the dates listed at the top of the prompt, copying the listed date where one matches. "Yesterday but one" means the day before yesterday. If the exact day cannot be worked out ("last week", "some time ago"), null.
 - Agreement: transaction__agreement_type is how the deal was made: "written" (a signed contract), "invoice", "whatsapp", "sms", "verbal" or "other".
   agreement_record = "yes" if the trader says a document or messages record the deal (contract, invoice, WhatsApp/SMS).
 - Dispute-resolution clauses. Do not confuse them:
@@ -94,7 +95,7 @@ function contextPrompt(text: string, ctx: ExtractContext): string {
     .map(([k, v]) => `- ${enT(`field.${k}` as Parameters<typeof enT>[0])}: ${v}`)
     .join("\n");
   const asking = ctx.asking.map((k) => enT(`field.${k}` as Parameters<typeof enT>[0])).join(", ");
-  return `Today's date: ${new Date().toISOString().slice(0, 10)}
+  return `${relativeDateHints(kampalaToday())}
 Current stage: ${ctx.stage ?? "1 (the trader's opening account)"}
 MANYA asked: ${ctx.question ? `"${ctx.question}"` : "Tell me what happened with your business transaction."}
 ${asking ? `The question was about: ${asking}` : ""}

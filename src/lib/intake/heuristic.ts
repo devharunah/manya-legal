@@ -3,6 +3,7 @@ import type { DisputeCategory } from "@/lib/cases/types";
 import { type FieldKey, fieldSpec } from "./fields";
 import { amountsIn, currencyGrounded } from "./ground";
 import type { Extraction } from "./merge";
+import { kampalaToday, relativeDatesIn } from "./relative-date";
 
 const MONTHS = [
   "january",
@@ -19,9 +20,12 @@ const MONTHS = [
   "december",
 ];
 
-/** "2026-11-10", "10 November 2026", "10 Nov 2026" → ISO dates, in the order written. */
-export function datesIn(text: string): string[] {
-  const found: { at: number; iso: string }[] = [];
+/**
+ * "2026-11-10", "10 November 2026", "10 Nov 2026" → ISO dates, in the order written.
+ * Given `today`, relative days ("yesterday", "yesterday but one", "3 days ago") count too.
+ */
+export function datesIn(text: string, today?: string): string[] {
+  const found: { at: number; iso: string }[] = today ? relativeDatesIn(text, today) : [];
   for (const m of text.matchAll(/\b(\d{4})-(\d{2})-(\d{2})\b/g)) {
     found.push({ at: m.index ?? 0, iso: m[0] });
   }
@@ -83,6 +87,7 @@ const sentences = (text: string) =>
 export function heuristicExtract(
   text: string,
   asking: FieldKey[] = [],
+  today: string = kampalaToday(),
 ): {
   extraction: Extraction;
   category: DisputeCategory | null;
@@ -98,7 +103,7 @@ export function heuristicExtract(
   if (amount) e["transaction.amount"] = amount;
   if (currencyGrounded("UGX", text)) e["transaction.currency"] = "UGX";
 
-  const [first, second] = datesIn(text);
+  const [first, second] = datesIn(text, today);
   if (first) {
     if (asked("delivery.expected_date") && !asked("transaction.date"))
       e["delivery.expected_date"] = first;
@@ -211,7 +216,7 @@ export function heuristicExtract(
 
   const events = sentences(text)
     .map((sentence) => ({
-      date: datesIn(sentence)[0] ?? null,
+      date: datesIn(sentence, today)[0] ?? null,
       text: sentence.replace(/[.!]+$/, ""),
     }))
     .filter((ev) => ev.date !== null);
